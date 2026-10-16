@@ -4,6 +4,6 @@ RUN curl -fsSL https://deno.land/install.sh | sh
 ENV DENO_INSTALL=/root/.deno
 ENV PATH=/root/.deno/bin:$PATH
 WORKDIR /app
-COPY . .
+COPY..
 RUN pip install --no-cache-dir --upgrade pip && pip install --no-cache-dir -U yt-dlp[default,curl-cffi] && pip install --no-cache-dir -r requirements.txt
 CMD ["gunicorn", "app:app", "--bind", "0.0.0.0:10000", "--timeout", "120", "--workers", "1"]
