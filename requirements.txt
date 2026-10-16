@@ -1,4 +1,4 @@
-flask==2.3.3
-gunicorn==21.2.0
-yt-dlp==2024.12.13
-bgutil-ytdlp-pot-provider==1.2.3
+flask
+gunicorn
+yt-dlp
+bgutil-ytdlp-pot-provider
