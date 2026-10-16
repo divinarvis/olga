@@ -1,4 +1,4 @@
-# V11.1 ULTRA - RETRY SI FORMAT BLOQUÉ - euuvuMhWsc + 535R
+# V12 - FIX ANDROID DEAD + FORMAT NATIF - 2026
 from flask import Flask, request, jsonify, send_from_directory
 import pathlib, re, os, json, yt_dlp
 app = Flask(__name__)
@@ -15,6 +15,8 @@ def clean(u):
 
 @app.route("/")
 def index(): return send_from_directory(str(BASE), "index.html")
+@app.route("/assets/<path:p>")
+def assets(p): return send_from_directory(str(BASE / "assets"), p)
 @app.route("/uploads/<path:p>")
 def uploads(p): return send_from_directory(str(UPLOAD_DIR), p)
 @app.route("/api/sync", methods=["GET","POST"])
@@ -58,50 +60,34 @@ def cookies_api():
     f.save(COOKIE_FILE)
     return jsonify({"ok":True})
 
-def try_download(url, opts):
-    with yt_dlp.YoutubeDL(opts) as ydl:
-        return ydl.extract_info(url, download=True)
-
 @app.route("/api/youtube", methods=["POST"])
 def youtube():
     url=clean((request.get_json() or {}).get("url") or "")
     if not url: return jsonify({"ok":False,"error":"no url"}),400
 
-    base_opts={
+    # V12: ON ENLEVE ANDROID (mort sans PO token) -> WEB + IOS seulement
+    ydl_opts={
         'outtmpl': str(UPLOAD_DIR / '%(title)s.%(ext)s'),
         'noplaylist': True,
         'nocheckcertificate': True,
-        'retries': 10,
-        'fragment_retries': 10,
-        'quiet': False,
-        'extractor_args': {'youtube': {'player_client': ['android','web']}},
+        'format': 'bestaudio/best',  # tolerant, prend opus, m4a, tout
+        'format_sort': ['hasaud','ext','quality'],
+        'extractor_args': {'youtube': {'player_client': ['web','ios']}},  # FIX ICI
         'postprocessors': [{'key':'FFmpegExtractAudio','preferredcodec':'mp3','preferredquality':'192'}],
+        'quiet': False,
     }
-    if COOKIE_FILE.exists(): base_opts['cookiefile']=str(COOKIE_FILE)
+    if COOKIE_FILE.exists(): ydl_opts['cookiefile']=str(COOKIE_FILE)
 
-    # 3 TENTATIVES - COMME YT APP
-    attempts = [
-        {**base_opts, 'format': None},  # natif YT
-        {**base_opts, 'format': 'bestaudio* / bestaudio / best / bv*+ba / b'},  # ultra tolerant
-        {**base_opts, 'format': 'best'},  # dernier recours
-    ]
-
-    last_err = ""
-    for i, opts in enumerate(attempts):
-        try:
-            print(f"TRY {i+1} format={opts.get('format')}")
-            info = try_download(url, opts)
+    try:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info=ydl.extract_info(url, download=True)
             return jsonify({"ok":True,"title":info.get('title')})
-        except Exception as e:
-            last_err = str(e)
-            print(f"FAIL {i+1}: {e}")
-            if "Requested format is not available" in last_err:
-                continue  # retry next format
-            # autre erreur -> stop
-            if i == 0: continue
+    except Exception as e:
+        print(f"YT FAIL V12: {e}")
+        return jsonify({"ok":False,"error":str(e)}),500
 
-    return jsonify({"ok":False,"error":last_err}),500
-
+@app.route("/api/version")
+def version(): return jsonify({"v":"V12 android fix","cookie":COOKIE_FILE.exists()})
 @app.route("/api/youtube/stop", methods=["POST"])
 @app.route("/api/youtube/cancel", methods=["POST"])
 @app.route("/api/stop", methods=["POST"])
