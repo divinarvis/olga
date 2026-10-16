@@ -1,5 +1,4 @@
 Flask
-Flask-Cors
-yt-dlp
-requests
+flask-cors
 gunicorn
+yt-dlp[default,curl-cffi]
