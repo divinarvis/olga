@@ -1,66 +1,71 @@
-# server.py V10.0 - fix bgutil once error
-from flask import Flask, request, jsonify, send_from_directory
-import pathlib, re, os
-import yt_dlp
-
-app = Flask(__name__)
-BASE = pathlib.Path(__file__).parent
-UPLOAD_DIR = BASE / "uploads"
-UPLOAD_DIR.mkdir(exist_ok=True)
-
-def clean_yt_url(u):
-    import re
-    m=re.search(r'(?:v=|youtu\.be/|shorts/)([A-Za-z0-9_-]{11})', u or "")
-    if m: return f"https://www.youtube.com/watch?v={m.group(1)}"
-    return u
-
-@app.route("/")
-def index(): return send_from_directory(str(BASE),"index.html")
-@app.route("/assets/<path:p>")
-def assets(p): return send_from_directory(str(BASE/"assets"),p)
-@app.route("/uploads/<path:p>")
-def uploads(p): return send_from_directory(str(UPLOAD_DIR),p)
-@app.route("/api/sync", methods=["GET","POST"])
-@app.route("/api/portal/sync", methods=["GET","POST"])
-def sync(): return jsonify({"action":"init"})
-@app.route("/api/files")
-def files(): return jsonify([{"name":f.name,"url":f"/uploads/{f.name}"} for f in UPLOAD_DIR.glob("*") if f.is_file()])
-@app.route("/api/delete", methods=["POST"])
-def delete_file():
-    try: (UPLOAD_DIR/(request.get_json() or {}).get("file","")).unlink(missing_ok=True)
-    except: pass
-    return jsonify({"ok":True})
-@app.route("/api/upload", methods=["POST"])
-def upload():
-    f=request.files.get("file")
-    fn=re.sub(r'[^A-Za-z0-9._-]','_',f.filename or "a.m4a")
-    f.save(UPLOAD_DIR/fn)
-    return jsonify({"ok":True})
-
-@app.route("/api/youtube", methods=["POST"])
-def youtube():
-    url=clean_yt_url((request.get_json() or {}).get("url") or "")
-    cookie=None
-    for n in ["cookies.txt","www.youtube.com_cookies.txt"]:
-        p=BASE/n
-        if p.exists(): cookie=str(p)
-    
-    opts={
-        'format':'bestaudio[ext=m4a]/bestaudio/best',
-        'outtmpl':str(UPLOAD_DIR/'%(title)s.%(ext)s'),
-        'noplaylist':True,
-        'nocheckcertificate':True,
-        'postprocessors':[{'key':'FFmpegExtractAudio','preferredcodec':'mp3','preferredquality':'192'}],
-    }
-    if cookie: opts['cookiefile']=cookie
-    
-    try:
-        with yt_dlp.YoutubeDL(opts) as ydl:
-            info=ydl.extract_info(url, download=True)
-            return jsonify({"ok":True,"title":info.get('title')})
-    except Exception as e:
-        print(e)
-        return jsonify({"ok":False,"error":str(e)[:800]}),500
-
-if __name__=="__main__":
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT",8000)))
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DIVINARVIS V8.11 - OLGA</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a0a;color:#fff;font-family:system-ui;padding:20px;min-height:100vh}
+h1{color:#ff2a6d;text-align:center;margin:20px 0;font-size:28px}
+.card{background:#1a1a1a;border-radius:12px;padding:20px;margin:15px auto;max-width:600px;border:1px solid #333}
+input{width:100%;padding:12px;border-radius:8px;border:1px solid #444;background:#222;color:#fff;margin:8px 0}
+button{width:100%;padding:12px;border-radius:8px;border:0;background:#ff2a6d;color:#fff;font-weight:700;cursor:pointer;margin:8px 0}
+button:hover{background:#ff4a8d}
+.file{background:#222;padding:12px;border-radius:8px;margin:8px 0;display:flex;justify-content:space-between;align-items:center}
+audio{width:100%;margin-top:15px}
+.small{font-size:12px;color:#888;text-align:center;margin-top:20px}
+</style>
+</head>
+<body>
+<h1>DIVINARVIS V8.11</h1>
+<div class="card">
+<h3>📁 Upload Audio</h3>
+<input type="file" id="fileInput" accept="audio/*,.mp3,.m4a,.mp4,.wav">
+<button onclick="uploadFile()">Uploader</button>
+</div>
+<div class="card">
+<h3>📺 YouTube</h3>
+<input type="text" id="ytUrl" placeholder="https://www.youtube.com/watch?v=...">
+<button onclick="downloadYT()">Télécharger YouTube</button>
+<div id="ytStatus" style="margin-top:10px;color:#0f0"></div>
+</div>
+<div class="card">
+<h3>🎵 Fichiers</h3>
+<div id="fileList">Chargement...</div>
+<audio id="player" controls></audio>
+</div>
+<div class="small" id="status">Serveur OK - olga-sfbp.onrender.com</div>
+<script>
+async function loadFiles(){
+ const r=await fetch('/api/files'); const files=await r.json();
+ const list=document.getElementById('fileList');
+ if(!files.length){list.innerHTML='<div style=color:#888>Aucun fichier</div>';return}
+ list.innerHTML=files.map(f=>`<div class=file><span>${f.name}</span><div><button style=width:auto;padding:6px 12px;margin:0 4px onclick="playFile('${f.url}')">▶️</button><button style=width:auto;padding:6px 12px;background:#333;margin:0 4px onclick="deleteFile('${f.name}')">🗑️</button></div></div>`).join('');
+}
+function playFile(url){document.getElementById('player').src=url;document.getElementById('player').play()}
+async function uploadFile(){
+ const inp=document.getElementById('fileInput'); if(!inp.files[0]){alert('Choisis un fichier');return}
+ const fd=new FormData(); fd.append('file',inp.files[0]);
+ document.getElementById('status').textContent='Upload...';
+ const r=await fetch('/api/upload',{method:'POST',body:fd}); const j=await r.json();
+ document.getElementById('status').textContent=j.ok?'Upload OK':'Erreur';
+ loadFiles();
+}
+async function downloadYT(){
+ const url=document.getElementById('ytUrl').value; if(!url){alert('Colle URL');return}
+ document.getElementById('ytStatus').textContent='Téléchargement YouTube... 30s';
+ const r=await fetch('/api/youtube',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url})});
+ const j=await r.json();
+ document.getElementById('ytStatus').textContent=j.ok?'OK: '+j.title:'Erreur: '+(j.error||'');
+ loadFiles();
+}
+async function deleteFile(name){
+ if(!confirm('Supprimer '+name+'?'))return;
+ await fetch('/api/delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name})});
+ loadFiles();
+}
+loadFiles();
+</script>
+</body>
+</html>
