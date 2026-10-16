@@ -1,17 +1,23 @@
-# V13 - LIST FORMATS & TAKE WHAT EXISTS - FIX euuvveMhWsc / 535RMiijAKY
+# V14 - AVEC TON BLOC YOUTUBE bestaudio/best - FIX euuvve
 from flask import Flask, request, jsonify, send_from_directory
 import pathlib, re, os, json, yt_dlp
+
 app = Flask(__name__)
 BASE = pathlib.Path(__file__).parent
 UPLOAD_DIR = BASE / "uploads"
 UPLOAD_DIR.mkdir(exist_ok=True)
 SYNC_FILE = BASE / "sync.json"
 COOKIE_FILE = BASE / "cookies.txt"
-if not SYNC_FILE.exists(): SYNC_FILE.write_text('{"ts":0}', encoding='utf-8')
+if not SYNC_FILE.exists():
+    SYNC_FILE.write_text('{"ts":0}', encoding='utf-8')
 
-def clean(u):
-    m=re.search(r'(?:v=|youtu\.be/|shorts/)([A-Za-z0-9_-]{11})', u or '')
+def clean_yt_url(u):
+    if not u:
+        return ""
+    m=re.search(r'(?:v=|youtu\.be/|shorts/)([A-Za-z0-9_-]{11})', u)
     return f"https://www.youtube.com/watch?v={m.group(1)}" if m else u
+
+def clean(u): return clean_yt_url(u)
 
 @app.route("/")
 def index(): return send_from_directory(str(BASE), "index.html")
@@ -60,44 +66,50 @@ def cookies_api():
     f.save(COOKIE_FILE)
     return jsonify({"ok":True})
 
-@app.route("/api/youtube", methods=["POST"])
+# --- TON BLOC EXACT ---
+@app.route('/api/youtube', methods=['POST'])
 def youtube():
-    url=clean((request.get_json() or {}).get("url") or "")
-    if not url: return jsonify({"ok":False,"error":"no url"}),400
-
-    base={
+    data = request.get_json() or {}
+    url = clean_yt_url(data.get("url", ""))
+    if not url:
+        return jsonify({"ok": False, "error": "URL manquante"}), 400
+    
+    cookie = None
+    for n in ["cookies.txt", "www.youtube.com_cookies.txt"]:
+        p = BASE / n
+        if p.exists():
+            cookie = str(p)
+            break
+            
+    opts = {
+        # 'bestaudio/best' permet de capturer n'importe quel flux audio disponible
+        'format': 'bestaudio/best',
         'outtmpl': str(UPLOAD_DIR / '%(title)s.%(ext)s'),
         'noplaylist': True,
         'nocheckcertificate': True,
-        'quiet': False,
-        'extractor_args': {'youtube': {'player_client': ['web']}},
-        'postprocessors': [{'key':'FFmpegExtractAudio','preferredcodec':'mp3','preferredquality':'192'}],
+        'postprocessors': [{
+            'key': 'FFmpegExtractAudio',
+            'preferredcodec': 'mp3',
+            'preferredquality': '192',
+        }],
+        # Evite les erreurs de format strict
+        'ignoreerrors': False,
     }
-    if COOKIE_FILE.exists(): base['cookiefile']=str(COOKIE_FILE)
-
-    # LIST FORMATS D'ABORD
+    
+    if cookie:
+        opts['cookiefile'] = cookie
+        
     try:
-        with yt_dlp.YoutubeDL({**base, 'quiet':True}) as ydl:
-            info=ydl.extract_info(url, download=False)
-            print(f"AVAILABLE FORMATS: {[f['format_id'] for f in info.get('formats',[])]}")
+        with yt_dlp.YoutubeDL(opts) as ydl:
+            info = ydl.extract_info(url, download=True)
+            title = info.get('title', 'audio') if info else 'audio'
+            return jsonify({"ok": True, "title": title})
     except Exception as e:
-        print(f"LIST FAIL: {e}")
-
-    for fmt in ['bestaudio/best', 'best', 'b']:
-        try:
-            print(f"TRYING FORMAT {fmt}")
-            with yt_dlp.YoutubeDL({**base, 'format': fmt}) as ydl:
-                info=ydl.extract_info(url, download=True)
-                return jsonify({"ok":True,"title":info.get('title')})
-        except Exception as e:
-            print(f"FAIL {fmt}: {e}")
-            last=str(e)
-            continue
-
-    return jsonify({"ok":False,"error":last}),500
+        print(e)
+        return jsonify({"ok": False, "error": str(e)[:800]}), 500
 
 @app.route("/api/version")
-def version(): return jsonify({"v":"V13 LIST FORMATS"})
+def version(): return jsonify({"v":"V14 TON BLOC bestaudio/best"})
 @app.route("/api/youtube/stop", methods=["POST"])
 @app.route("/api/youtube/cancel", methods=["POST"])
 @app.route("/api/stop", methods=["POST"])
