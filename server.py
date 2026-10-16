@@ -1,4 +1,4 @@
-# V10.7 - AUTH LEGIT - SIGN IN YT
+# V11.0 - YT FORMAT NATIF - FIX DEFINITIF 535R
 from flask import Flask, request, jsonify, send_from_directory
 import pathlib, re, os, json, yt_dlp
 app = Flask(__name__)
@@ -53,7 +53,6 @@ def upload():
     f.save(dest)
     return jsonify({"ok":True,"file":dest.name})
 
-# NOUVEAU: Upload du cookies.txt via l'interface
 @app.route("/api/cookies", methods=["POST","GET","DELETE"])
 def cookies_api():
     if request.method=="GET":
@@ -62,30 +61,38 @@ def cookies_api():
         if COOKIE_FILE.exists(): COOKIE_FILE.unlink()
         return jsonify({"ok":True})
     f=request.files.get("file") or request.files.get("cookies")
-    if not f: return jsonify({"ok":False,"error":"no file"}),400
+    if not f: return jsonify({"ok":False}),400
     f.save(COOKIE_FILE)
-    return jsonify({"ok":True,"message":"Sign in OK"})
+    return jsonify({"ok":True})
 
 @app.route("/api/youtube", methods=["POST"])
 def youtube():
     url=clean((request.get_json() or {}).get("url") or "")
     if not url: return jsonify({"ok":False,"error":"no url"}),400
-    opts={
-        'format': 'bestaudio/best',
+
+    # FORMAT YT NATIF - COMME SUR L'APP YOUTUBE, PAS DE FILTRE
+    ydl_opts={
         'outtmpl': str(UPLOAD_DIR / '%(title)s.%(ext)s'),
         'noplaylist': True,
         'nocheckcertificate': True,
-        'extractor_args': {'youtube': {'player_client': ['android','ios']}},
+        'format_sort': ['hasaud','quality','hasvid'],
+        'extractor_args': {'youtube': {'player_client': ['android','web']}},
         'postprocessors': [{'key':'FFmpegExtractAudio','preferredcodec':'mp3','preferredquality':'192'}],
-        'quiet': True,
+        'retries': 10,
+        'fragment_retries': 10,
+        'quiet': False,
+        'verbose': True,
     }
+    # Pas de 'format' = yt-dlp prend le meilleur dispo comme YT
     if COOKIE_FILE.exists():
-        opts['cookiefile']=str(COOKIE_FILE)
+        ydl_opts['cookiefile']=str(COOKIE_FILE)
+
     try:
-        with yt_dlp.YoutubeDL(opts) as ydl:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info=ydl.extract_info(url, download=True)
             return jsonify({"ok":True,"title":info.get('title')})
     except Exception as e:
+        print(f"YT FAIL: {e}")
         return jsonify({"ok":False,"error":str(e)}),500
 
 @app.route("/api/youtube/stop", methods=["POST"])
