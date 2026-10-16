@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>DIVINARVIS V8.12 - Cookies Phone + Share Nom</title>
+<title>DIVINARVIS V8.13 - Cookies Phone Fixed + Share Nom</title>
 <style>
 :root{color-scheme:dark;--bg:#0d0408;--panel:rgba(22,9,16,.9);--panel2:rgba(33,12,23,.86);--line:rgba(244,63,94,.34);--text:#fff1f5;--muted:#c48b9f;--rose:#f43f5e;--violet:#d946ef;--green:#4ade80}
 *{box-sizing:border-box}html,body{margin:0;min-height:100%;background:linear-gradient(180deg,#15060d,#0d0408);color:var(--text);font-family:Inter,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
@@ -16,7 +16,7 @@ button,input{font:inherit}button{cursor:pointer}
 .grid{display:grid;grid-template-columns:300px 1fr;gap:18px;margin-top:18px}.card{border:1px solid var(--line);border-radius:22px;background:linear-gradient(180deg,var(--panel2),var(--panel));overflow:hidden}
 .cardHeader{display:flex;justify-content:space-between;align-items:center;padding:15px 17px;border-bottom:1px solid rgba(244,63,94,.12)}.cardHeader h2{margin:0;font-size:13px;letter-spacing:.12em;color:#ffd1df;text-transform:uppercase}
 .profile{padding:18px;text-align:center}.portraitWrap{width:220px;aspect-ratio:1;margin:2px auto 14px;border-radius:50%;padding:7px;background:linear-gradient(135deg,var(--rose),var(--violet),#f5d06f)}.portrait{width:100%;height:100%;border-radius:50%;object-fit:cover;display:block;border:4px solid #14040a}
-.profile h3{margin:8px 0 3px;font-size:24px}.tag{color:var(--rose);letter-spacing:.16em;font-size:11px}.quote{margin:12px auto 0;max-width:320px;color:#ffe4ed;font-style:italic;font-size:13px}
+.profile h3{margin:8px 0 3px;font-size:24px}.tag{color:var(--rose);letter-spacing:.16em;font-size:11px}
 .player{padding:18px}.now{display:flex;gap:18px;align-items:center}.cover{width:120px;height:120px;border-radius:18px;object-fit:cover;border:1px solid var(--line);flex-shrink:0}.nowTitle{font-size:22px;font-weight:900;margin:0 0 6px;word-break:break-word}.nowMeta{color:var(--muted);font-size:13px}
 .controls{display:flex;gap:10px;margin:16px 0;justify-content:center;flex-wrap:wrap}.iconBtn{width:48px;height:48px;border-radius:14px;border:1px solid var(--line);background:#1a060f;color:white;font-size:20px;display:grid;place-items:center}
 .iconBtn.play{width:62px;height:62px;border-radius:50%;background:linear-gradient(135deg,var(--rose),var(--violet));font-size:24px}
@@ -36,9 +36,9 @@ button,input{font:inherit}button{cursor:pointer}
 </style>
 </head>
 <body>
-<div id="soundGate"><div class="gateCard"><div style="font-size:48px">🔊</div><h2>V8.12 COOKIES PHONE</h2><div style="color:var(--muted);font-size:13px">Fix bot YouTube + Share Nom russe</div><button type="button" class="gateBtn" id="gateBtn">▶️ ACTIVER LE SON</button></div></div>
+<div id="soundGate"><div class="gateCard"><div style="font-size:48px">🔊</div><h2>V8.13 FIX COOKIES</h2><div style="color:var(--muted);font-size:13px">Cookies Phone + Share Nom Russe</div><button type="button" class="gateBtn" id="gateBtn">▶️ ACTIVER LE SON</button></div></div>
 <main class="shell">
-<header class="topbar"><div class="brand"><div class="logo">D</div><div><h1>DIVINARVIS</h1><small>V8.12 • COOKIES PHONE ↔️ SHARE NOM</small></div></div><div class="onlineBox"><i class="dot ok"></i><div><strong id="syncStatus">ONLINE</strong></div></div></header>
+<header class="topbar"><div class="brand"><div class="logo">D</div><div><h1>DIVINARVIS</h1><small>V8.13 • COOKIES PHONE FIXED</small></div></div><div class="onlineBox"><i class="dot ok"></i><div><strong id="syncStatus">ONLINE</strong></div></div></header>
 <div class="grid">
 <div>
 <article class="card profile"><div class="portraitWrap"><img class="portrait" src="assets/olga.jpeg" onerror="this.src='https://i.pravatar.cc/300?img=5'"></div><h3>OLGA</h3><div class="tag">DIVINARVIS MUSE</div></article>
@@ -69,15 +69,16 @@ button,input{font:inherit}button{cursor:pointer}
 <div class="ytBox"><input id="ytInput" class="ytInput" type="text" placeholder="Colle 1 lien YouTube..."><button type="button" id="ytBtn" class="ytBtn">YT+</button><button type="button" id="ytStopBtn" class="ytStop">STOP</button></div>
 <div id="ytStatus" style="font-size:11px;color:var(--muted)">YT prêt</div>
 
-<!-- BLOC COOKIES PHONE REMIS -->
-<div style="margin-top:8px; border:1px dashed #ff4d9d; padding:12px; border-radius:12px; background:rgba(255,77,157,.06);">
-  <div style="font-size:13px; font-weight:800; margin-bottom:8px;">🍪 FIX BOT YouTube - Charger cookies depuis le phone</div>
+<!-- BLOC COOKIES PHONE V8.13 -->
+<div style="margin-top:8px; border:2px dashed #ff4d9d; padding:12px; border-radius:14px; background:rgba(255,77,157,.08);">
+  <div style="font-size:13px; font-weight:900; margin-bottom:8px;">🍪 FIX BOT YouTube - Charger cookies depuis le phone</div>
   <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
-    <input type="file" id="cookiesFile" accept=".txt" class="file" style="flex:1; padding:8px;" />
-    <button type="button" id="cookiesBtn" class="btn primary" style="padding:10px 14px;">Uploader cookies.txt</button>
+    <input type="file" id="cookiesFile" accept=".txt" class="file" style="flex:1; min-width:140px; padding:8px;" />
+    <button type="button" id="cookiesBtn" class="btn primary" style="padding:10px 14px; white-space:nowrap;">Uploader cookies.txt</button>
   </div>
-  <div id="cookiesStatus2" style="font-size:11px; margin-top:8px; color:#c48b9f;">Vérification cookies...</div>
-  <div style="font-size:10px; color:#8a4f65; margin-top:6px;">Sur PC: extension Chrome "Get cookies.txt LOCALLY" sur youtube.com > Export > envoie le fichier sur ton phone > upload ici.</div>
+  <div id="cookiesStatus2" style="font-size:12px; margin-top:8px; color:#c48b9f;">Vérification cookies...</div>
+  <button type="button" id="clearCookiesBtn" class="btn danger" style="margin-top:8px; width:100%; padding:8px; font-size:12px;">🗑️ Effacer cookies.txt (si invalide)</button>
+  <div style="font-size:10px; color:#8a4f65; margin-top:8px; line-height:1.4;">⚠️ Ton fichier doit faire 10k+ bytes et contenir youtube.com. Sur PC: Chrome > extension "Get cookies.txt LOCALLY" > ouvre youtube.com CONNECTÉ > coche Include httpOnly > Export > envoie fichier sur phone > upload ici.</div>
 </div>
 
 <input id="fileInput" class="file" type="file" accept=".mp3,.m4a,.wav,.aac,.mp4,audio/*" multiple>
@@ -86,7 +87,7 @@ button,input{font:inherit}button{cursor:pointer}
 </div></article>
 </div>
 </div>
-<div class="footer">V8.12 COOKIES PHONE + SHARE NOM - olga-sfbp.onrender.com/api/yt OK</div>
+<div class="footer">V8.13 COOKIES PHONE FIXED - olga-sfbp.onrender.com</div>
 </main>
 <script>
 const $=id=>document.getElementById(id);
@@ -96,108 +97,45 @@ const titleEl=$('title'), metaEl=$('meta'), hint=$('liveHint'), progress=$('prog
 const playlistEl=$('playlist'), trackCount=$('trackCount'), trackCount2=$('trackCount2');
 const ytInput=$('ytInput'), ytBtn=$('ytBtn'), ytStopBtn=$('ytStopBtn'), killYTBtn=$('killYT'), ytStatus=$('ytStatus'), fileInput=$('fileInput'), clearBtn=$('clearShared');
 const soundGate=$('soundGate'), gateBtn=$('gateBtn'), soundState=$('soundState'), syncStatus=$('syncStatus');
-const cookiesFile=$('cookiesFile'), cookiesBtn=$('cookiesBtn'), cookiesStatus=$('cookiesStatus'), cookiesStatus2=$('cookiesStatus2');
+const cookiesFile=$('cookiesFile'), cookiesBtn=$('cookiesBtn'), cookiesStatus=$('cookiesStatus'), cookiesStatus2=$('cookiesStatus2'), clearCookiesBtn=$('clearCookiesBtn');
 let tracks=[], current=-1, isLove=false, lastTs=0, soundUnlocked=false, isCapital=false, isLoop=false, lastFilesHash="", currentRadioId=null;
 let ytAbort=null, ytDownloading=false;
 let trueNameMemory = new Map();
 let recentUploads = [];
-try{
-  const saved = JSON.parse(localStorage.getItem('divinarvis_true_names')||'{}');
-  for(const k in saved){ trueNameMemory.set(k, saved[k]); }
-  log(`📦 Mémoire: ${trueNameMemory.size} noms`, 'good');
-}catch{}
-function saveMemory(){
-  try{
-    const obj={};
-    for(const [k,v] of trueNameMemory){ obj[k]=v; }
-    localStorage.setItem('divinarvis_true_names', JSON.stringify(obj));
-  }catch{}
-}
+try{ const saved = JSON.parse(localStorage.getItem('divinarvis_true_names')||'{}'); for(const k in saved){ trueNameMemory.set(k, saved[k]); } log(`📦 Mémoire: ${trueNameMemory.size} noms`, 'good'); }catch{}
+function saveMemory(){ try{ const obj={}; for(const [k,v] of trueNameMemory){ obj[k]=v; } localStorage.setItem('divinarvis_true_names', JSON.stringify(obj)); }catch{} }
 const seenSignatures = new Map();
 function makeSig(file){ return `${file.name}::${file.size}::${file.lastModified}`; }
-function isDuplicate(file){
-  const sig=makeSig(file); const now=Date.now();
-  for(const [k,t] of seenSignatures){ if(now-t>15000) seenSignatures.delete(k); }
-  if(seenSignatures.has(sig)) return true;
-  seenSignatures.set(sig, now); return false;
-}
-function safeDecode(str){
-  if(!str) return ""; if(str.indexOf('%')===-1) return str;
-  try{ let d=str; for(let i=0;i<4;i++){ try{ const n=decodeURIComponent(d); if(n===d) break; d=n; }catch{ break; } } return d; }catch{ return str; }
-}
-function getDisplayNameFromServer(raw){
-  if(!raw) return "audio.mp3";
-  let n=raw.trim(); n=safeDecode(n); n=n.split('\\').pop().split('/').pop(); return n.trim();
-}
-function getTrueLocalName(file){
-  if(!file||!file.name) return "audio.mp3";
-  return file.name.replace(/^C:\\fakepath\\/i,"").trim();
-}
+function isDuplicate(file){ const sig=makeSig(file); const now=Date.now(); for(const [k,t] of seenSignatures){ if(now-t>15000) seenSignatures.delete(k); } if(seenSignatures.has(sig)) return true; seenSignatures.set(sig, now); return false; }
+function safeDecode(str){ if(!str) return ""; if(str.indexOf('%')===-1) return str; try{ let d=str; for(let i=0;i<4;i++){ try{ const n=decodeURIComponent(d); if(n===d) break; d=n; }catch{ break; } } return d; }catch{ return str; } }
+function getDisplayNameFromServer(raw){ if(!raw) return "audio.mp3"; let n=raw.trim(); n=safeDecode(n); n=n.split('\\').pop().split('/').pop(); return n.trim(); }
+function getTrueLocalName(file){ if(!file||!file.name) return "audio.mp3"; return file.name.replace(/^C:\\fakepath\\/i,"").trim(); }
 function normalizeNameForDedup(name){ return (name||"").toLowerCase().trim(); }
 function formatCount(c,s,p){ return c<=1? `${c} ${s}` : `${c} ${p}`; }
 function unlockSound(){if(soundUnlocked) return; soundUnlocked=true; try{audio.muted=true; const pr=audio.play(); if(pr) pr.then(()=>{audio.pause(); audio.muted=false;}).catch(()=>{audio.muted=false;});}catch{} soundGate.classList.add('hide'); soundState.textContent='🔊 ACTIF'; soundState.style.color='#4ade80'; hint.textContent='SON ACTIF'; log('🔊 SON ACTIVÉ','good'); localStorage.setItem('divinarvis_sound','1');}
 gateBtn.addEventListener('click', unlockSound); if(localStorage.getItem('divinarvis_sound')==='1'){ unlockSound(); }
 function updateActionButtonsVisibility(){ const hasTracks=tracks.length>0; killYTBtn.style.display=(hasTracks||ytDownloading)?'block':'none'; }
 function render(){
-  playlistEl.innerHTML='';
-  if(!tracks.length){
-    playlistEl.innerHTML='<div style="padding:22px;text-align:center;color:var(--muted);font-size:13px">Aucune piste.</div>';
-    trackCount.textContent=formatCount(0,'morceau','morceaux'); trackCount2.textContent=formatCount(0,'piste','pistes'); syncStatus.textContent='VIDE'; updateActionButtonsVisibility(); return;
-  }
-  tracks.forEach((t,i)=>{
-    let showName=t.name||"Sans nom"; let shortName=showName.length>50? showName.substring(0,42)+'...'+(showName.includes('.')?'.'+showName.split('.').pop():'') : showName;
-    const div=document.createElement('div'); div.className='track'+(i===current?' active':'');
-    div.innerHTML=`<span style="flex:1;cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px" title="${showName.replace(/"/g,'&quot;')}" onclick="window.playIdx(${i},false)">${i+1}. ${shortName}</span><div style="display:flex;gap:6px"><b style="font-size:10px;cursor:pointer" onclick="window.playIdx(${i},false)">PLAY</b><button type="button" class="delBtn" onclick="window.deleteTrack(${i})">🗑️</button></div>`;
-    playlistEl.appendChild(div);
-  });
+  playlistEl.innerHTML=''; if(!tracks.length){ playlistEl.innerHTML='<div style="padding:22px;text-align:center;color:var(--muted);font-size:13px">Aucune piste.</div>'; trackCount.textContent=formatCount(0,'morceau','morceaux'); trackCount2.textContent=formatCount(0,'piste','pistes'); syncStatus.textContent='VIDE'; updateActionButtonsVisibility(); return; }
+  tracks.forEach((t,i)=>{ let showName=t.name||"Sans nom"; let shortName=showName.length>50? showName.substring(0,42)+'...'+(showName.includes('.')?'.'+showName.split('.').pop():'') : showName; const div=document.createElement('div'); div.className='track'+(i===current?' active':''); div.innerHTML=`<span style="flex:1;cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px" title="${showName.replace(/"/g,'&quot;')}" onclick="window.playIdx(${i},false)">${i+1}. ${shortName}</span><div style="display:flex;gap:6px"><b style="font-size:10px;cursor:pointer" onclick="window.playIdx(${i},false)">PLAY</b><button type="button" class="delBtn" onclick="window.deleteTrack(${i})">🗑️</button></div>`; playlistEl.appendChild(div); });
   trackCount.textContent=formatCount(tracks.length,'morceau','morceaux'); trackCount2.textContent=formatCount(tracks.length,'piste','pistes'); syncStatus.textContent='SYNC OK - '+tracks.length; updateActionButtonsVisibility();
 }
-function pushSync(a, extra={}){
-  try{
-    const p={action:a,index:current,isPlaying:!audio.paused,isLove:isLove,isCapital:isCapital,isLoop:isLoop,capitalUrl:audio.src,capitalName:titleEl.textContent,currentRadioId:currentRadioId,ts:Date.now(),...extra};
-    localStorage.setItem('divinarvis_sync', JSON.stringify(p));
-    fetch('/api/sync',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(p)}).catch(()=>{});
-    fetch('/api/portal/sync',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(p)}).catch(()=>{});
-  }catch{}
-}
+function pushSync(a, extra={}){ try{ const p={action:a,index:current,isPlaying:!audio.paused,isLove:isLove,isCapital:isCapital,isLoop:isLoop,capitalUrl:audio.src,capitalName:titleEl.textContent,currentRadioId:currentRadioId,ts:Date.now(),...extra}; localStorage.setItem('divinarvis_sync', JSON.stringify(p)); fetch('/api/sync',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(p)}).catch(()=>{}); fetch('/api/portal/sync',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(p)}).catch(()=>{}); }catch{} }
 function hideLoveCast(){ loveCast.style.display='none'; loveIframe.src=''; loveBtn.classList.remove('active'); isLove=false; }
-window.playIdx=(i, fromRemote=false)=>{
-  if(!soundUnlocked) unlockSound(); if(i<0||i>=tracks.length) return;
-  hideLoveCast(); current=i; const tr=tracks[i]; isLove=false; isCapital=false; currentRadioId=null; loveBtn.classList.remove('active'); $('cap1').classList.remove('active'); $('cap2').classList.remove('active');
-  audio.src=tr.url; audio.load(); audio.play().then(()=>{log('▶️ Lecture: '+tr.name,'good');}).catch(e=>{log('Erreur: '+e.message,'err');});
-  playBtn.textContent='⏸️'; titleEl.textContent=tr.name; metaEl.textContent=`Playlist ${i+1}/${tracks.length}`; render(); if(!fromRemote) pushSync('playIdx');
-};
-window.playCapital=(url,name,radioId,fromRemote=false)=>{
-  if(!soundUnlocked) unlockSound(); hideLoveCast(); isLove=false; isCapital=true; currentRadioId=radioId; loveBtn.classList.remove('active');
-  $('cap1').classList.remove('active'); $('cap2').classList.remove('active'); $(radioId).classList.add('active');
-  audio.pause(); try{ audio.src=''; audio.load(); }catch{}
-  setTimeout(()=>{ audio.src=url; audio.load(); audio.play().then(()=>{log('📻 ON AIR: '+name,'good');}).catch(e=>{log('Radio erreur: '+e.message,'err');}); titleEl.textContent=name; metaEl.textContent='LIVE - '+name; hint.textContent='ON AIR - '+name; playBtn.textContent='⏸️'; if(!fromRemote) pushSync('capital'); },100);
-};
-window.stopRadio=(radioId)=>{
-  try{ audio.pause(); }catch{} try{ audio.src=''; audio.removeAttribute('src'); audio.load(); }catch{}
-  isCapital=false; currentRadioId=null; $('cap1').classList.remove('active'); $('cap2').classList.remove('active');
-  titleEl.textContent='Radio arrêtée'; metaEl.textContent='Clique PLAY'; hint.textContent='ARRÊTÉ'; playBtn.textContent='▶️'; progress.style.width='0%'; log('⏹️ Radio arrêtée','good'); pushSync('stopRadio');
-};
+window.playIdx=(i, fromRemote=false)=>{ if(!soundUnlocked) unlockSound(); if(i<0||i>=tracks.length) return; hideLoveCast(); current=i; const tr=tracks[i]; isLove=false; isCapital=false; currentRadioId=null; loveBtn.classList.remove('active'); $('cap1').classList.remove('active'); $('cap2').classList.remove('active'); audio.src=tr.url; audio.load(); audio.play().then(()=>{log('▶️ Lecture: '+tr.name,'good');}).catch(e=>{log('Erreur: '+e.message,'err');}); playBtn.textContent='⏸️'; titleEl.textContent=tr.name; metaEl.textContent=`Playlist ${i+1}/${tracks.length}`; render(); if(!fromRemote) pushSync('playIdx'); };
+window.playCapital=(url,name,radioId,fromRemote=false)=>{ if(!soundUnlocked) unlockSound(); hideLoveCast(); isLove=false; isCapital=true; currentRadioId=radioId; loveBtn.classList.remove('active'); $('cap1').classList.remove('active'); $('cap2').classList.remove('active'); $(radioId).classList.add('active'); audio.pause(); try{ audio.src=''; audio.load(); }catch{} setTimeout(()=>{ audio.src=url; audio.load(); audio.play().then(()=>{log('📻 ON AIR: '+name,'good');}).catch(e=>{log('Radio erreur: '+e.message,'err');}); titleEl.textContent=name; metaEl.textContent='LIVE - '+name; hint.textContent='ON AIR - '+name; playBtn.textContent='⏸️'; if(!fromRemote) pushSync('capital'); },100); };
+window.stopRadio=(radioId)=>{ try{ audio.pause(); }catch{} try{ audio.src=''; audio.removeAttribute('src'); audio.load(); }catch{} isCapital=false; currentRadioId=null; $('cap1').classList.remove('active'); $('cap2').classList.remove('active'); titleEl.textContent='Radio arrêtée'; metaEl.textContent='Clique PLAY'; hint.textContent='ARRÊTÉ'; playBtn.textContent='▶️'; progress.style.width='0%'; log('⏹️ Radio arrêtée','good'); pushSync('stopRadio'); };
 $('playCap1').addEventListener('click',()=>{ playCapital('https://media-ice.musicradio.com/CapitalMP3','Capital London','cap1'); });
 $('playCap2').addEventListener('click',()=>{ playCapital('https://media-ice.musicradio.com/CapitalXTRANationalMP3','Capital XTRA','cap2'); });
 $('stopCap1').addEventListener('click',()=>{ stopRadio('cap1'); });
 $('stopCap2').addEventListener('click',()=>{ stopRadio('cap2'); });
-window.deleteTrack=async(i)=>{
-  const name=tracks[i]?.name; const serverName=tracks[i]?.serverFileName||name;
-  if(!name) return; if(!confirm(`Supprimer "${name}"?`)) return;
-  try{ await fetch('/api/delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({file:serverName})}); }catch{}
-  if(tracks[i].url && tracks[i].url.startsWith('blob:')){ try{ URL.revokeObjectURL(tracks[i].url); }catch{} }
-  trueNameMemory.delete(serverName); saveMemory();
-  tracks.splice(i,1); if(current===i){audio.pause(); try{ audio.src=''; audio.load(); }catch{} current=-1; titleEl.textContent='Playlist'; metaEl.textContent='Aucune piste'; playBtn.textContent='▶️'; progress.style.width='0%';} if(current>i) current--;
-  lastFilesHash=""; render(); log('🗑️ Supprimé: '+name,'warn'); pushSync('delete'); setTimeout(()=>loadFiles(true),500);
-};
+window.deleteTrack=async(i)=>{ const name=tracks[i]?.name; const serverName=tracks[i]?.serverFileName||name; if(!name) return; if(!confirm(`Supprimer "${name}"?`)) return; try{ await fetch('/api/delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({file:serverName})}); }catch{} if(tracks[i].url && tracks[i].url.startsWith('blob:')){ try{ URL.revokeObjectURL(tracks[i].url); }catch{} } trueNameMemory.delete(serverName); saveMemory(); tracks.splice(i,1); if(current===i){audio.pause(); try{ audio.src=''; audio.load(); }catch{} current=-1; titleEl.textContent='Playlist'; metaEl.textContent='Aucune piste'; playBtn.textContent='▶️'; progress.style.width='0%';} if(current>i) current--; lastFilesHash=""; render(); log('🗑️ Supprimé: '+name,'warn'); pushSync('delete'); setTimeout(()=>loadFiles(true),500); };
 audio.addEventListener('timeupdate',()=>{if(audio.duration) progress.style.width=(audio.currentTime/audio.duration*100)+'%';});
 audio.addEventListener('ended',()=>{ if(isLoop){ audio.currentTime=0; audio.play().catch(()=>{}); } else if(!isCapital &&!isLove && current<tracks.length-1) window.playIdx(current+1); });
 playBtn.onclick=()=>{ if(!soundUnlocked) unlockSound(); if(!audio.src&&tracks.length) { window.playIdx(0); } else if(audio.paused){ if(audio.src){ audio.play().catch(()=>{}); playBtn.textContent='⏸️'; pushSync('resume'); } } else { audio.pause(); playBtn.textContent='▶️'; pushSync('pause'); } };
 prevBtn.onclick=()=>{if(current>0) window.playIdx(current-1);};
 nextBtn.onclick=()=>{if(current<tracks.length-1) window.playIdx(current+1);};
 loopBtn.onclick=()=>{ isLoop=!isLoop; audio.loop=isLoop; if(isLoop){ loopBtn.classList.add('active'); loopState.textContent='ON'; loopState.style.color='#4ade80'; } else{ loopBtn.classList.remove('active'); loopState.textContent='OFF'; loopState.style.color='var(--muted)'; } pushSync('loop'); };
-
 async function loadFiles(force=false){
   try{
     const r=await fetch('/api/files'); const files=await r.json();
@@ -208,22 +146,10 @@ async function loadFiles(force=false){
     if(hasLocal &&!force){ render(); return files; }
     const newTracks=[];
     for(const f of files){
-      const serverName=f.name;
-      const serverDisplay=getDisplayNameFromServer(serverName);
-      let trueName=serverDisplay;
+      const serverName=f.name; const serverDisplay=getDisplayNameFromServer(serverName); let trueName=serverDisplay;
       if(trueNameMemory.has(serverName)){ trueName=trueNameMemory.get(serverName); }
       else if(trueNameMemory.has(serverDisplay)){ trueName=trueNameMemory.get(serverDisplay); }
-      else{
-        const isUgly =!/[\u0400-\u04FFa-zA-Z0-9]/.test(serverDisplay) || /^(file|upload|audio|blob)_\d+/i.test(serverDisplay) || serverDisplay.length<4;
-        if(isUgly && recentUploads.length>0){
-          for(let j=recentUploads.length-1;j>=0;j--){
-            const ru=recentUploads[j];
-            if(!Array.from(trueNameMemory.values()).includes(ru.trueName) || newTracks.length===0){
-              trueName=ru.trueName; trueNameMemory.set(serverName, trueName); saveMemory(); log(`🔄 PC récupère russe: "${serverDisplay}" → "${trueName}"`, 'good'); break;
-            }
-          }
-        }
-      }
+      else{ const isUgly =!/[\u0400-\u04FFa-zA-Z0-9]/.test(serverDisplay) || /^(file|upload|audio|blob)_\d+/i.test(serverDisplay) || serverDisplay.length<4; if(isUgly && recentUploads.length>0){ for(let j=recentUploads.length-1;j>=0;j--){ const ru=recentUploads[j]; if(!Array.from(trueNameMemory.values()).includes(ru.trueName) || newTracks.length===0){ trueName=ru.trueName; trueNameMemory.set(serverName, trueName); saveMemory(); log(`🔄 PC récupère russe: "${serverDisplay}" → "${trueName}"`, 'good'); break; } } } }
       if(/[\u0400-\u04FF]/.test(safeDecode(serverName))){ trueName=safeDecode(serverName); }
       newTracks.push({name:trueName, serverFileName:serverName, url:f.url, local:false, _norm:normalizeNameForDedup(trueName)});
     }
@@ -244,37 +170,57 @@ function stopYT(){ if(ytAbort) ytAbort.abort(); ['/api/youtube/stop','/api/youtu
 ytBtn.addEventListener('click',addYT); ytStopBtn.addEventListener('click',stopYT); killYTBtn.addEventListener('click',stopYT);
 ytInput.addEventListener('keydown',e=>{if(e.key==='Enter') addYT();});
 
-// ---- COOKIES PHONE LOGIC ----
+// ---- COOKIES PHONE V8.13 ----
 async function checkCookies(){
   try{
     const r=await fetch('/api/cookies/status'); const j=await r.json();
-    if(j.exists){
+    if(j.exists && j.size>5000){
       cookiesStatus.textContent=`✅ ${j.size}b`; cookiesStatus.style.color='#4ade80';
-      cookiesStatus2.textContent=`✅ cookies.txt présent (${j.size} bytes) - YouTube OK`;
+      cookiesStatus2.innerHTML=`✅ <b>cookies.txt présent (${j.size} bytes) - YouTube OK</b>`;
       cookiesStatus2.style.color='#4ade80';
+    } else if(j.exists){
+      cookiesStatus.textContent=`⚠️ ${j.size}b`; cookiesStatus.style.color='#fcd34d';
+      cookiesStatus2.innerHTML=`⚠️ <b>cookies.txt trop petit (${j.size} bytes) - invalide</b><br>Refais export CONNECTÉ avec httpOnly`;
+      cookiesStatus2.style.color='#fcd34d';
     } else {
       cookiesStatus.textContent='❌ MANQUE'; cookiesStatus.style.color='#f43f5e';
       cookiesStatus2.textContent='❌ pas de cookies.txt - YouTube dira "Sign in to confirm you\'re not a bot"';
       cookiesStatus2.style.color='#fda4af';
     }
-  }catch{
-    cookiesStatus.textContent='?'; cookiesStatus2.textContent='Erreur check cookies';
-  }
+  }catch{ cookiesStatus.textContent='?'; cookiesStatus2.textContent='Erreur check cookies'; }
 }
 async function uploadCookiesFromPhone(){
-  const file=cookiesFile.files[0];
+  const file = cookiesFile.files[0];
   if(!file){ alert('Choisis d\'abord ton fichier cookies.txt'); return; }
+  const text = await file.text();
+  if(!text.includes('youtube.com') &&!text.includes('google.com')){
+    alert('❌ Fichier invalide: ne contient pas youtube.com\nRefais export avec "Get cookies.txt LOCALLY" sur youtube.com CONNECTÉ');
+    return;
+  }
+  if(text.length < 5000){
+    if(!confirm(`⚠️ Fichier petit (${text.length} bytes), probablement incomplet. Continuer quand même?`)) return;
+  }
   const fd=new FormData(); fd.append('file', file);
   cookiesBtn.textContent='⏳...'; cookiesBtn.disabled=true;
   try{
     const r=await fetch('/api/cookies/upload',{method:'POST', body:fd});
     const j=await r.json();
-    if(j.ok){ log(`🍪 Cookies uploadés: ${j.msg}`,'good'); alert('✅ Cookies chargés! Re-teste YT+ avec https://youtu.be/fcnDmrtj6Sk'); }
+    if(j.ok){ log(`🍪 Cookies OK: ${j.msg}`,'good'); alert('✅ Cookies chargés!\nTaille: '+text.length+' bytes\nRe-teste YT+ avec euuvuMhWsc'); }
     else{ log('❌ Cookies error: '+j.error,'err'); alert('Erreur: '+j.error); }
   }catch(e){ log('❌ Réseau cookies','err'); alert('Erreur réseau'); }
-  cookiesBtn.textContent='Uploader cookies.txt'; cookiesBtn.disabled=false; checkCookies();
+  cookiesBtn.textContent='Uploader cookies.txt'; cookiesBtn.disabled=false;
+  cookiesFile.value=''; checkCookies();
 }
 cookiesBtn.addEventListener('click', uploadCookiesFromPhone);
+clearCookiesBtn.addEventListener('click', async()=>{
+  if(!confirm('Effacer cookies.txt du serveur?')) return;
+  try{
+    await fetch('/api/cookies/upload',{method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({content:''})});
+    await fetch('/api/delete',{method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({file:'cookies.txt'})}).catch(()=>{});
+    log('🗑️ cookies.txt effacé','warn'); alert('Cookies effacés, refais un bon export');
+  }catch{}
+  checkCookies();
+});
 checkCookies();
 
 let isUploadingLocal=false;
@@ -295,56 +241,19 @@ fileInput.addEventListener('change', async (e)=>{
     const fd=new FormData(); fd.append('file', f, trueName);
     try{
       const r=await fetch('/api/upload',{method:'POST',body:fd}); const j=await r.json();
-      if(j.ok){
-        const serverSavedName=j.file||j.filename||j.name||trueName;
-        trueNameMemory.set(serverSavedName, trueName); trueNameMemory.set(trueName, trueName); saveMemory();
-        log(`✅ Serveur: "${trueName}" -> "${serverSavedName}"`,'good');
-        pushSync('newLocal', {trueNameMap: {[serverSavedName]: trueName}, lastUploadTrueName: trueName, lastUploadServerName: serverSavedName});
-      }else{ log(`❌ Upload échoué: ${trueName}`,'err'); }
+      if(j.ok){ const serverSavedName=j.file||j.filename||j.name||trueName; trueNameMemory.set(serverSavedName, trueName); trueNameMemory.set(trueName, trueName); saveMemory(); log(`✅ Serveur: "${trueName}" -> "${serverSavedName}"`,'good'); pushSync('newLocal', {trueNameMap: {[serverSavedName]: trueName}, lastUploadTrueName: trueName, lastUploadServerName: serverSavedName}); }
+      else{ log(`❌ Upload échoué: ${trueName}`,'err'); }
     }catch(err){ log(`❌ Réseau: ${trueName}`,'err'); }
   }
-  setTimeout(async()=>{
-    const locals=tracks.filter(t=>t.local);
-    for(const lb of locals){ if(lb.url.startsWith('blob:')){ try{ URL.revokeObjectURL(lb.url); }catch{} } }
-    isUploadingLocal=false; await loadFiles(true); log(`✅ Sync finie`,'good'); pushSync('newLocal');
-  },2000);
+  setTimeout(async()=>{ const locals=tracks.filter(t=>t.local); for(const lb of locals){ if(lb.url.startsWith('blob:')){ try{ URL.revokeObjectURL(lb.url); }catch{} } } isUploadingLocal=false; await loadFiles(true); log(`✅ Sync finie`,'good'); pushSync('newLocal'); },2000);
 });
-clearBtn.addEventListener('click',async()=>{
-  if(!confirm('Effacer toute la playlist?')) return;
-  log('🗑️ Effacement...','warn'); clearBtn.disabled=true; clearBtn.textContent='⏳...';
-  try{ const r=await fetch('/api/files'); const files=await r.json(); for(const f of files){ try{ await fetch('/api/delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({file:f.name})}); }catch{} } }catch{}
-  tracks.forEach(t=>{ if(t.url && t.url.startsWith('blob:')){ try{ URL.revokeObjectURL(t.url); }catch{} } });
-  tracks=[]; current=-1; lastFilesHash=""; audio.pause(); try{ audio.src=''; audio.load(); }catch{}
-  progress.style.width='0%'; titleEl.textContent='Playlist vidée'; metaEl.textContent='Aucune piste'; playBtn.textContent='▶️'; render(); log('✅ Playlist effacée','good'); pushSync('clear');
-  setTimeout(async()=>{ await loadFiles(true); clearBtn.disabled=false; clearBtn.textContent='🗑️ EFFACER TOUTE LA PLAYLIST'; },800);
-});
-loveBtn.addEventListener('click',()=>{
-  if(!soundUnlocked) unlockSound();
-  if(loveCast.style.display==='none' || loveCast.style.display===''){
-    loveCast.style.display='block'; loveIframe.src='https://www.loveradio.ru/'; loveBtn.classList.add('active'); isLove=true; log('🌐 LOVE ouvert','good'); setTimeout(()=>{ loveCast.scrollIntoView({behavior:'smooth'}); },300);
-  } else { hideLoveCast(); log('🌐 LOVE fermé','warn'); }
-});
-function handleSyncData(d){
-  if(!d ||!d.ts || d.ts<=lastTs) return; lastTs=d.ts;
-  if(d.trueNameMap){
-    for(const srv in d.trueNameMap){
-      const trueN=d.trueNameMap[srv];
-      if(trueN){ trueNameMemory.set(srv, trueN); trueNameMemory.set(trueN, trueN); log(`📥 Reçoit russe: "${srv}" → "${trueN}"`, 'good'); }
-    }
-    saveMemory(); loadFiles(true);
-  }
-  if(d.lastUploadTrueName && d.lastUploadServerName){ trueNameMemory.set(d.lastUploadServerName, d.lastUploadTrueName); saveMemory(); loadFiles(true); }
-  if(d.action==='capital'){ if(d.capitalUrl && d.capitalUrl!==audio.src && d.currentRadioId!==currentRadioId){ window.playCapital(d.capitalUrl,d.capitalName||'Capital', d.currentRadioId||'cap1', true); } return; }
-  if(d.action==='stopRadio'){ try{ audio.pause(); audio.src=''; audio.load(); }catch{} isCapital=false; currentRadioId=null; $('cap1').classList.remove('active'); $('cap2').classList.remove('active'); titleEl.textContent='Radio arrêtée'; metaEl.textContent='Arrêt sync'; hint.textContent='ARRÊTÉ'; playBtn.textContent='▶️'; progress.style.width='0%'; return; }
-  if(d.action==='loop'){ isLoop=d.isLoop; audio.loop=isLoop; if(isLoop){ loopBtn.classList.add('active'); loopState.textContent='ON'; } else{ loopBtn.classList.remove('active'); loopState.textContent='OFF'; } return; }
-  if(d.action==='playIdx' || d.action==='resume'){ if(d.index!==current && d.index>=0 && d.index<tracks.length){ window.playIdx(d.index, true); } else if(audio.paused && d.isPlaying && audio.src){ audio.play().catch(()=>{}); playBtn.textContent='⏸️'; } }
-  else if(d.action==='pause'){ audio.pause(); playBtn.textContent='▶️'; }
-  else if(d.action==='newLocal' || d.action==='newYT' || d.action==='delete' || d.action==='clear'){ loadFiles(true); }
-}
+clearBtn.addEventListener('click',async()=>{ if(!confirm('Effacer toute la playlist?')) return; log('🗑️ Effacement...','warn'); clearBtn.disabled=true; clearBtn.textContent='⏳...'; try{ const r=await fetch('/api/files'); const files=await r.json(); for(const f of files){ try{ await fetch('/api/delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({file:f.name})}); }catch{} } }catch{} tracks.forEach(t=>{ if(t.url && t.url.startsWith('blob:')){ try{ URL.revokeObjectURL(t.url); }catch{} } }); tracks=[]; current=-1; lastFilesHash=""; audio.pause(); try{ audio.src=''; audio.load(); }catch{} progress.style.width='0%'; titleEl.textContent='Playlist vidée'; metaEl.textContent='Aucune piste'; playBtn.textContent='▶️'; render(); log('✅ Playlist effacée','good'); pushSync('clear'); setTimeout(async()=>{ await loadFiles(true); clearBtn.disabled=false; clearBtn.textContent='🗑️ EFFACER TOUTE LA PLAYLIST'; },800); });
+loveBtn.addEventListener('click',()=>{ if(!soundUnlocked) unlockSound(); if(loveCast.style.display==='none' || loveCast.style.display===''){ loveCast.style.display='block'; loveIframe.src='https://www.loveradio.ru/'; loveBtn.classList.add('active'); isLove=true; log('🌐 LOVE ouvert','good'); setTimeout(()=>{ loveCast.scrollIntoView({behavior:'smooth'}); },300); } else { hideLoveCast(); log('🌐 LOVE fermé','warn'); } });
+function handleSyncData(d){ if(!d ||!d.ts || d.ts<=lastTs) return; lastTs=d.ts; if(d.trueNameMap){ for(const srv in d.trueNameMap){ const trueN=d.trueNameMap[srv]; if(trueN){ trueNameMemory.set(srv, trueN); trueNameMemory.set(trueN, trueN); log(`📥 Reçoit russe: "${srv}" → "${trueN}"`, 'good'); } } saveMemory(); loadFiles(true); } if(d.lastUploadTrueName && d.lastUploadServerName){ trueNameMemory.set(d.lastUploadServerName, d.lastUploadTrueName); saveMemory(); loadFiles(true); } if(d.action==='capital'){ if(d.capitalUrl && d.capitalUrl!==audio.src && d.currentRadioId!==currentRadioId){ window.playCapital(d.capitalUrl,d.capitalName||'Capital', d.currentRadioId||'cap1', true); } return; } if(d.action==='stopRadio'){ try{ audio.pause(); audio.src=''; audio.load(); }catch{} isCapital=false; currentRadioId=null; $('cap1').classList.remove('active'); $('cap2').classList.remove('active'); titleEl.textContent='Radio arrêtée'; metaEl.textContent='Arrêt sync'; hint.textContent='ARRÊTÉ'; playBtn.textContent='▶️'; progress.style.width='0%'; return; } if(d.action==='loop'){ isLoop=d.isLoop; audio.loop=isLoop; if(isLoop){ loopBtn.classList.add('active'); loopState.textContent='ON'; } else{ loopBtn.classList.remove('active'); loopState.textContent='OFF'; } return; } if(d.action==='playIdx' || d.action==='resume'){ if(d.index!==current && d.index>=0 && d.index<tracks.length){ window.playIdx(d.index, true); } else if(audio.paused && d.isPlaying && audio.src){ audio.play().catch(()=>{}); playBtn.textContent='⏸️'; } } else if(d.action==='pause'){ audio.pause(); playBtn.textContent='▶️'; } else if(d.action==='newLocal' || d.action==='newYT' || d.action==='delete' || d.action==='clear'){ loadFiles(true); } }
 window.addEventListener('storage',(e)=>{ if(e.key==='divinarvis_sync'){ try{ handleSyncData(JSON.parse(e.newValue)); }catch{} }});
 setInterval(async()=>{ try{ let r=await fetch('/api/portal/sync'); if(!r.ok) r=await fetch('/api/sync'); if(r.ok){ const d=await r.json(); handleSyncData(d); } await loadFiles(false); }catch{} },3000);
 loadFiles(true);
-log('DIVINARVIS V8.12 COOKIES PHONE + SHARE NOM READY','good');
+log('DIVINARVIS V8.13 COOKIES PHONE FIXED READY','good');
 </script>
 </body>
 </html>
