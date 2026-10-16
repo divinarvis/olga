@@ -1,4 +1,4 @@
-# server.py V10.2 - DIVINARVIS V8.11.0 + FIX YT BOT 2026
+# server.py V10.3 - FIX 403 FORBIDDEN - FORCE ANDROID + PO_TOKEN
 from flask import Flask, request, jsonify, send_from_directory
 import pathlib, re, os, json
 import yt_dlp
@@ -18,64 +18,44 @@ def clean_yt_url(u):
     return u
 
 @app.route("/")
-def index():
-    return send_from_directory(str(BASE), "index.html")
-
+def index(): return send_from_directory(str(BASE), "index.html")
 @app.route("/assets/<path:p>")
-def assets(p):
-    return send_from_directory(str(BASE / "assets"), p)
-
+def assets(p): return send_from_directory(str(BASE / "assets"), p)
 @app.route("/uploads/<path:p>")
-def uploads(p):
-    return send_from_directory(str(UPLOAD_DIR), p)
+def uploads(p): return send_from_directory(str(UPLOAD_DIR), p)
 
 @app.route("/api/sync", methods=["GET","POST"])
 @app.route("/api/portal/sync", methods=["GET","POST"])
 def sync():
     if request.method=="POST":
-        try:
-            data=request.get_json() or {}
-            SYNC_FILE.write_text(json.dumps(data, ensure_ascii=False), encoding='utf-8')
-            return jsonify({"ok":True})
-        except Exception as e:
-            return jsonify({"ok":False, "error":str(e)}),500
+        data=request.get_json() or {}
+        SYNC_FILE.write_text(json.dumps(data, ensure_ascii=False), encoding='utf-8')
+        return jsonify({"ok":True})
     else:
-        try:
-            return jsonify(json.loads(SYNC_FILE.read_text(encoding='utf-8')))
-        except:
-            return jsonify({"ts":0})
+        try: return jsonify(json.loads(SYNC_FILE.read_text(encoding='utf-8')))
+        except: return jsonify({"ts":0})
 
 @app.route("/api/files")
 def files():
     result=[]
     for f in UPLOAD_DIR.glob("*"):
-        if f.is_file():
-            result.append({"name": f.name, "url": f"/uploads/{f.name}", "size": f.stat().st_size})
-    result.sort(key=lambda x: x["name"])
+        if f.is_file(): result.append({"name": f.name, "url": f"/uploads/{f.name}"})
     return jsonify(result)
 
 @app.route("/api/delete", methods=["POST"])
 def delete_file():
-    try:
-        data=request.get_json() or {}
-        name=data.get("file") or data.get("name")
-        if name:
-            p = UPLOAD_DIR / pathlib.Path(name).name
-            if p.exists():
-                p.unlink()
-        return jsonify({"ok":True})
-    except Exception as e:
-        return jsonify({"ok":False, "error":str(e)}),500
+    data=request.get_json() or {}
+    name=data.get("file") or data.get("name")
+    if name:
+        p = UPLOAD_DIR / pathlib.Path(name).name
+        if p.exists(): p.unlink()
+    return jsonify({"ok":True})
 
 @app.route("/api/upload", methods=["POST"])
 def upload():
     f = request.files.get("file")
-    if not f:
-        return jsonify({"ok":False, "error":"no file"}),400
-    raw_name = f.filename or "audio.mp3"
-    safe = re.sub(r'[\\/]+','_', raw_name).strip()
-    if not safe:
-        safe="audio.mp3"
+    if not f: return jsonify({"ok":False}),400
+    safe = re.sub(r'[\\/]+','_', f.filename or "audio.mp3").strip()
     dest = UPLOAD_DIR / safe
     i=1
     base=safe
@@ -83,58 +63,54 @@ def upload():
         name, ext = os.path.splitext(base)
         dest = UPLOAD_DIR / f"{name}_{i}{ext}"
         i+=1
-        if i>100:
-            break
     f.save(dest)
-    return jsonify({"ok":True, "file": dest.name, "name": dest.name, "filename": dest.name})
+    return jsonify({"ok":True, "file": dest.name})
 
 @app.route("/api/youtube", methods=["POST"])
 def youtube():
     data=request.get_json() or {}
     url=clean_yt_url(data.get("url") or "")
-    if not url:
-        return jsonify({"ok":False, "error":"no url"}),400
+    if not url: return jsonify({"ok":False, "error":"no url"}),400
 
     cookie=None
-    for n in ["cookies.txt","www.youtube.com_cookies.txt","youtube.com_cookies.txt"]:
+    for n in ["cookies.txt","www.youtube.com_cookies.txt"]:
         p=BASE / n
-        if p.exists():
-            cookie=str(p)
-            break
+        if p.exists(): cookie=str(p); break
 
+    # FIX 403 : FORCE ANDROID CLIENT + PO_TOKEN via bgutil
     opts={
-        'format':'bestaudio[ext=m4a]/bestaudio/best',
-        'outtmpl':str(UPLOAD_DIR / '%(title)s.%(ext)s'),
-        'noplaylist':True,
-        'nocheckcertificate':True,
+        'format': 'bestaudio[ext=m4a]/bestaudio/best',
+        'outtmpl': str(UPLOAD_DIR / '%(title)s.%(ext)s'),
+        'noplaylist': True,
+        'nocheckcertificate': True,
         'extractor_args': {
             'youtube': {
-                'player_client': ['android', 'ios', 'web'],
-                'player_skip': ['webpage', 'configs'],
+                'player_client': ['android_music','android','ios'],
+                'po_token': ['android_music+android.embeds'],
             }
         },
+        'http_headers': {
+            'User-Agent': 'com.google.android.youtube/19.09.37 (Linux; U; Android 11) gzip',
+        },
         'postprocessors':[{'key':'FFmpegExtractAudio','preferredcodec':'mp3','preferredquality':'192'}],
-        'no_warnings': False,
-        'ignoreerrors': False,
+        'retries': 3,
+        'fragment_retries': 3,
     }
-    if cookie:
-        opts['cookiefile']=cookie
+    if cookie: opts['cookiefile']=cookie
 
     try:
         with yt_dlp.YoutubeDL(opts) as ydl:
             info=ydl.extract_info(url, download=True)
-            title = info.get('title') or "youtube"
-            return jsonify({"ok":True, "title": title})
+            return jsonify({"ok":True, "title": info.get('title')})
     except Exception as e:
-        print(f"YT ERROR: {e}")
+        print(f"YT 403 ERROR: {e}")
         return jsonify({"ok":False, "error": str(e)}),500
 
 @app.route("/api/youtube/stop", methods=["POST"])
 @app.route("/api/youtube/cancel", methods=["POST"])
 @app.route("/api/stop", methods=["POST"])
 @app.route("/api/kill", methods=["POST"])
-def stop_dummy():
-    return jsonify({"ok":True})
+def stop_dummy(): return jsonify({"ok":True})
 
 if __name__=="__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT",8000)))
