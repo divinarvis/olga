@@ -1,4 +1,3 @@
-flask
-gunicorn
+Flask
 yt-dlp
-bgutil-ytdlp-pot-provider
+gunicorn
