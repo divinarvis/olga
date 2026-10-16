@@ -1,4 +1,4 @@
-# V11.0 - YT FORMAT NATIF - FIX DEFINITIF 535R
+# V11.1 ULTRA - RETRY SI FORMAT BLOQUÉ - euuvuMhWsc + 535R
 from flask import Flask, request, jsonify, send_from_directory
 import pathlib, re, os, json, yt_dlp
 app = Flask(__name__)
@@ -15,11 +15,8 @@ def clean(u):
 
 @app.route("/")
 def index(): return send_from_directory(str(BASE), "index.html")
-@app.route("/assets/<path:p>")
-def assets(p): return send_from_directory(str(BASE / "assets"), p)
 @app.route("/uploads/<path:p>")
 def uploads(p): return send_from_directory(str(UPLOAD_DIR), p)
-
 @app.route("/api/sync", methods=["GET","POST"])
 @app.route("/api/portal/sync", methods=["GET","POST"])
 def sync():
@@ -28,10 +25,8 @@ def sync():
         return jsonify({"ok":True})
     try: return jsonify(json.loads(SYNC_FILE.read_text(encoding='utf-8')))
     except: return jsonify({"ts":0})
-
 @app.route("/api/files")
 def files(): return jsonify([{"name":f.name,"url":f"/uploads/{f.name}"} for f in UPLOAD_DIR.glob("*") if f.is_file()])
-
 @app.route("/api/delete", methods=["POST"])
 def delete_file():
     n=(request.get_json() or {}).get("file") or (request.get_json() or {}).get("name")
@@ -39,7 +34,6 @@ def delete_file():
         p=UPLOAD_DIR / pathlib.Path(n).name
         if p.exists(): p.unlink()
     return jsonify({"ok":True})
-
 @app.route("/api/upload", methods=["POST"])
 def upload():
     f=request.files.get("file")
@@ -52,7 +46,6 @@ def upload():
         dest=UPLOAD_DIR / f"{name}_{i}{ext}"; i+=1
     f.save(dest)
     return jsonify({"ok":True,"file":dest.name})
-
 @app.route("/api/cookies", methods=["POST","GET","DELETE"])
 def cookies_api():
     if request.method=="GET":
@@ -65,35 +58,49 @@ def cookies_api():
     f.save(COOKIE_FILE)
     return jsonify({"ok":True})
 
+def try_download(url, opts):
+    with yt_dlp.YoutubeDL(opts) as ydl:
+        return ydl.extract_info(url, download=True)
+
 @app.route("/api/youtube", methods=["POST"])
 def youtube():
     url=clean((request.get_json() or {}).get("url") or "")
     if not url: return jsonify({"ok":False,"error":"no url"}),400
 
-    # FORMAT YT NATIF - COMME SUR L'APP YOUTUBE, PAS DE FILTRE
-    ydl_opts={
+    base_opts={
         'outtmpl': str(UPLOAD_DIR / '%(title)s.%(ext)s'),
         'noplaylist': True,
         'nocheckcertificate': True,
-        'format_sort': ['hasaud','quality','hasvid'],
-        'extractor_args': {'youtube': {'player_client': ['android','web']}},
-        'postprocessors': [{'key':'FFmpegExtractAudio','preferredcodec':'mp3','preferredquality':'192'}],
         'retries': 10,
         'fragment_retries': 10,
         'quiet': False,
-        'verbose': True,
+        'extractor_args': {'youtube': {'player_client': ['android','web']}},
+        'postprocessors': [{'key':'FFmpegExtractAudio','preferredcodec':'mp3','preferredquality':'192'}],
     }
-    # Pas de 'format' = yt-dlp prend le meilleur dispo comme YT
-    if COOKIE_FILE.exists():
-        ydl_opts['cookiefile']=str(COOKIE_FILE)
+    if COOKIE_FILE.exists(): base_opts['cookiefile']=str(COOKIE_FILE)
 
-    try:
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info=ydl.extract_info(url, download=True)
+    # 3 TENTATIVES - COMME YT APP
+    attempts = [
+        {**base_opts, 'format': None},  # natif YT
+        {**base_opts, 'format': 'bestaudio* / bestaudio / best / bv*+ba / b'},  # ultra tolerant
+        {**base_opts, 'format': 'best'},  # dernier recours
+    ]
+
+    last_err = ""
+    for i, opts in enumerate(attempts):
+        try:
+            print(f"TRY {i+1} format={opts.get('format')}")
+            info = try_download(url, opts)
             return jsonify({"ok":True,"title":info.get('title')})
-    except Exception as e:
-        print(f"YT FAIL: {e}")
-        return jsonify({"ok":False,"error":str(e)}),500
+        except Exception as e:
+            last_err = str(e)
+            print(f"FAIL {i+1}: {e}")
+            if "Requested format is not available" in last_err:
+                continue  # retry next format
+            # autre erreur -> stop
+            if i == 0: continue
+
+    return jsonify({"ok":False,"error":last_err}),500
 
 @app.route("/api/youtube/stop", methods=["POST"])
 @app.route("/api/youtube/cancel", methods=["POST"])
