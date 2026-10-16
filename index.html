@@ -15,14 +15,17 @@ button,input{font:inherit}button{cursor:pointer}
 .onlineBox{display:flex;align-items:center;gap:10px;padding:10px 14px;border:1px solid var(--line);border-radius:14px;background:#18060f}.dot{width:10px;height:10px;border-radius:99px;background:#64748b}.dot.ok{background:var(--green);box-shadow:0 0 12px var(--green)}
 .grid{display:grid;grid-template-columns:300px 1fr;gap:18px;margin-top:18px}.card{border:1px solid var(--line);border-radius:22px;background:linear-gradient(180deg,var(--panel2),var(--panel));overflow:hidden}
 .cardHeader{display:flex;justify-content:space-between;align-items:center;padding:15px 17px;border-bottom:1px solid rgba(244,63,94,.12)}.cardHeader h2{margin:0;font-size:13px;letter-spacing:.12em;color:#ffd1df;text-transform:uppercase}
-.profile{padding:18px;text-align:center}.portraitWrap{width:220px;aspect-ratio:1;margin:2px auto 14px;border-radius:50%;padding:7px;background:linear-gradient(135deg,var(--rose),var(--violet),#f5d06f)}.portrait{width:100%;height:100%;border-radius:50%;object-fit:cover;display:block;border:4px solid #14040a}
-.profile h3{margin:8px 0 3px;font-size:24px}.tag{color:var(--rose);letter-spacing:.16em;font-size:11px}.quote{margin:12px auto 0;max-width:320px;color:#ffe4ed;font-style:italic;font-size:13px}
-.player{padding:18px}.now{display:flex;gap:18px;align-items:center}.cover{width:120px;height:120px;border-radius:18px;object-fit:cover;border:1px solid var(--line);flex-shrink:0}.nowTitle{font-size:22px;font-weight:900;margin:0 0 6px;word-break:break-word}.nowMeta{color:var(--muted);font-size:13px}
+.profile{padding:18px;text-align:center}.portraitWrap{width:220px;aspect-ratio:1;margin:2px auto 14px;border-radius:50%;padding:7px;background:linear-gradient(135deg,var(--rose),var(--violet),#f5d06f)}.portrait{width:100%;height:100%;border-radius:50%;object-fit:cover;object-position:top center;display:block;border:4px solid #14040a;background:#14040a}
+.profile h3{margin:8px 0 3px;font-size:24px}.tag{color:var(--rose);letter-spacing:.16em;font-size:11px}
+.player{padding:18px}.now{display:flex;gap:18px;align-items:center}.cover{width:120px;height:120px;border-radius:18px;object-fit:cover;object-position:top center;border:1px solid var(--line);flex-shrink:0;background:#14040a}.nowTitle{font-size:22px;font-weight:900;margin:0 0 6px;word-break:break-word}.nowMeta{color:var(--muted);font-size:13px}
 .controls{display:flex;gap:10px;margin:16px 0;justify-content:center;flex-wrap:wrap}.iconBtn{width:48px;height:48px;border-radius:14px;border:1px solid var(--line);background:#1a060f;color:white;font-size:20px;display:grid;place-items:center}
 .iconBtn.play{width:62px;height:62px;border-radius:50%;background:linear-gradient(135deg,var(--rose),var(--violet));font-size:24px}
 .iconBtn.love{width:auto;padding:0 20px;background:linear-gradient(135deg,#ff2d78,#ff5a8a);font-weight:900;font-size:13px;border-color:#ff2d78}.iconBtn.love.active{background:#fff;color:#ff2d78}
 .iconBtn.loop{border-color:#a21caf}.iconBtn.loop.active{background:linear-gradient(135deg,#a21caf,#e11d48)}
-.playlist{padding:10px;max-height:360px;overflow:auto}.uploadBox{padding:16px;display:grid;gap:12px}.file{width:100%;padding:12px;border-radius:12px;background:#14040a;color:#fbcfe8;border:1px solid var(--line);font-size:16px}
+.playlist{padding:10px;max-height:360px;overflow:auto}.uploadBox{padding:16px;display:grid;gap:12px}
+.fileHidden{display:none}
+.fileLabel{display:block;width:100%;padding:14px 16px;border-radius:14px;background:linear-gradient(135deg,#1a060f,#2b0a18);color:#fbcfe8;border:1px dashed rgba(244,63,94,.5);font-size:14px;font-weight:800;text-align:center;cursor:pointer}
+.fileLabel:active{transform:scale(.98)}
 .ytBox{display:grid;grid-template-columns:1fr 64px 64px;gap:10px;align-items:center}.ytInput{width:100%;padding:14px 16px;border-radius:14px;background:#14040a;color:#fbcfe8;border:1px solid rgba(244,63,94,.3);font-size:15px;outline:none}.ytBtn{height:48px;border-radius:14px;border:1px solid #e11d48;background:linear-gradient(135deg,#e11d48,#a21caf);color:white;font-weight:900;font-size:14px;display:grid;place-items:center}.ytStop{height:48px;border-radius:14px;border:1px solid rgba(251,113,133,.4);background:#1a060f;color:#fecdd3;font-weight:800;font-size:12px;display:grid;place-items:center}
 .btn{padding:12px 14px;border-radius:13px;border:1px solid var(--line);background:#2b0a18;color:white;font-weight:800}.btn.primary{background:linear-gradient(135deg,#e11d48,#a21caf)}.btn.danger{border-color:rgba(251,113,133,.6);color:#fecdd3;background:#3a0a18}.btn.stop{background:#1a060f;border-color:#64748b;color:#cbd5e1}
 .track{padding:12px;margin:6px 0;background:rgba(255,255,255,.06);border-radius:12px;display:flex;justify-content:space-between;align-items:center;border:1px solid transparent;gap:10px}.track.active{border-color:#f43f5e;background:rgba(244,63,94,.18)}
@@ -41,12 +44,12 @@ button,input{font:inherit}button{cursor:pointer}
 <header class="topbar"><div class="brand"><div class="logo">D</div><div><h1>DIVINARVIS</h1><small>V8.11.0 • SHARE NOM PC ↔️ iPhone</small></div></div><div class="onlineBox"><i class="dot ok"></i><div><strong id="syncStatus">ONLINE</strong></div></div></header>
 <div class="grid">
 <div>
-<article class="card profile"><div class="portraitWrap"><img class="portrait" src="assets/olga.jpeg" onerror="this.src='https://i.pravatar.cc/300?img=5'"></div><h3>OLGA</h3><div class="tag">DIVINARVIS MUSE</div></article>
+<article class="card profile"><div class="portraitWrap"><img class="portrait" id="olgaPhoto" src="assets/olga.jpeg" onerror="this.onerror=null;this.src='https://i.pravatar.cc/300?img=5'"></div><h3>OLGA</h3><div class="tag">DIVINARVIS MUSE</div></article>
 <article class="card" style="margin-top:18px"><div class="cardHeader"><h2>Sync</h2></div><div style="padding:16px"><div style="display:grid;gap:10px;font-size:13px"><div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Playlist</span><span id="trackCount">0 morceau</span></div><div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Son</span><span id="soundState" style="color:#f43f5e;font-weight:800">🔇 BLOQUÉ</span></div><div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Boucle</span><span id="loopState" style="color:var(--muted);font-weight:800">OFF</span></div></div></div></article>
 <article class="card" style="margin-top:18px"><div class="cardHeader"><h2>Journal</h2></div><div class="log" id="log"></div></article>
 </div>
 <div>
-<article class="card"><div class="cardHeader"><h2>Media Control</h2><small id="liveHint" style="color:var(--muted)">SON BLOQUÉ</small></div><div class="player"><div class="now"><img id="cover" class="cover" src="assets/olga.jpeg"><div><div class="nowTitle" id="title">Son bloqué</div><div class="nowMeta" id="meta">Clique pour activer.</div></div></div><audio id="audio" playsinline preload="metadata" crossorigin="anonymous"></audio>
+<article class="card"><div class="cardHeader"><h2>Media Control</h2><small id="liveHint" style="color:var(--muted)">SON BLOQUÉ</small></div><div class="player"><div class="now"><img id="cover" class="cover" src="assets/olga.jpeg" onerror="this.src='assets/olga.jpeg'"><div><div class="nowTitle" id="title">Son bloqué</div><div class="nowMeta" id="meta">Clique pour activer.</div></div></div><audio id="audio" playsinline preload="metadata" crossorigin="anonymous"></audio>
 <div class="controls">
 <button type="button" class="iconBtn" id="prevBtn">⏮</button>
 <button type="button" class="iconBtn play" id="playBtn">▶️</button>
@@ -65,19 +68,25 @@ button,input{font:inherit}button{cursor:pointer}
 
 <article class="card" style="margin-top:18px"><div class="cardHeader"><h2>DIVINARVIS Playlist</h2><span id="trackCount2">0 piste</span></div><div class="playlist" id="playlist"></div></article>
 
-<!-- AUTH YT FIX 535R -->
-<article class="card" style="margin-top:18px;border-color:#ff2d78"><div class="cardHeader"><h2>🔐 YOUTUBE SIGN IN (clips bloqués)</h2><span id="cookieStatus" style="font-size:10px;color:#86efac">Vérif...</span></div><div style="padding:14px;display:grid;gap:10px"><div style="font-size:11px;color:var(--muted)">Pour éviter "Sign in to confirm you're not a bot" sur VEVO comme 535RMiijAKY :<br>1. Va sur youtube.com (PC) connecté<br>2. Extension "Get cookies.txt LOCALLY" → Export<br>3. Upload ici → ton compte perso est utilisé</div><div style="display:grid;grid-template-columns:1fr 110px 110px;gap:8px"><input id="cookieFile" class="file" type="file" accept=".txt"><button type="button" id="cookieBtn" class="btn primary" style="font-size:12px">Se connecter</button><button type="button" id="cookieDelBtn" class="btn stop" style="font-size:12px">Déconnexion</button></div></div></article>
+<article class="card" style="margin-top:18px;border-color:#ff2d78"><div class="cardHeader"><h2>🔐 YOUTUBE SIGN IN (CLIPS BLOQUÉS)</h2><span id="cookieStatus" style="font-size:10px;color:#86efac">Vérif...</span></div><div style="padding:14px;display:grid;gap:10px"><div style="font-size:11px;color:var(--muted)">Pour éviter "Sign in to confirm you're not a bot" sur VEVO comme 535RMiijAKY : 1. Va sur youtube.com connecté 2. Extension "Get cookies.txt LOCALLY" → Export 3. Upload ici</div>
+<div style="display:grid;grid-template-columns:1fr 110px 110px;gap:8px;align-items:center">
+<input id="cookieFile" class="fileHidden" type="file" accept=".txt"><label for="cookieFile" class="fileLabel" style="padding:10px">📁 Choisir cookies.txt</label>
+<button type="button" id="cookieBtn" class="btn primary" style="font-size:12px;height:44px">Se connecter</button><button type="button" id="cookieDelBtn" class="btn stop" style="font-size:12px;height:44px">Déconnexion</button></div></div></article>
 
-<article class="card" style="margin-top:18px"><div class="cardHeader"><h2>Charger</h2></div><div class="uploadBox">
+<article class="card" style="margin-top:18px"><div class="cardHeader"><h2>CHARGER</h2></div><div class="uploadBox">
 <div class="ytBox"><input id="ytInput" class="ytInput" type="text" placeholder="Colle 1 lien YouTube..."><button type="button" id="ytBtn" class="ytBtn">YT+</button><button type="button" id="ytStopBtn" class="ytStop">STOP</button></div>
 <div id="ytStatus" style="font-size:11px;color:var(--muted)">YT prêt</div>
-<input id="fileInput" class="file" type="file" accept=".mp3,.m4a,.wav,.aac,.mp4,audio/*" multiple>
+
+<input id="fileInput" class="fileHidden" type="file" accept=".mp3,.m4a,.wav,.aac,.mp4,audio/*" multiple>
+<label for="fileInput" class="fileLabel" style="background:linear-gradient(135deg,#e11d48,#a21caf);border-style:solid;color:white">📁 CHOISIR MUSIQUES - Nom russe gardé</label>
+<div id="fileChosen" style="font-size:11px;color:var(--muted);text-align:center"></div>
+
 <button type="button" id="clearShared" class="btn danger" style="width:100%">🗑️ EFFACER TOUTE LA PLAYLIST</button>
 <button type="button" id="killYT" class="btn danger" style="width:100%;margin-top:6px;background:#7f1d1d;display:none">🚫 TUER LE DOWNLOAD YT</button>
 </div></article>
 </div>
 </div>
-<div class="footer">V8.11.0 SHARE NOM + AUTH FIX</div>
+<div class="footer">V8.11.0 SHARE NOM + AUTH FIX + OLGA FIX</div>
 </main>
 <script>
 const $=id=>document.getElementById(id);
@@ -226,7 +235,8 @@ ytBtn.addEventListener('click',addYT); ytStopBtn.addEventListener('click',stopYT
 ytInput.addEventListener('keydown',e=>{if(e.key==='Enter') addYT();});
 let isUploadingLocal=false;
 fileInput.addEventListener('change', async (e)=>{
-  const inputEl=e.target; const filesRaw=Array.from(inputEl.files||[]); inputEl.value=''; inputEl.disabled=true; setTimeout(()=>{ inputEl.disabled=false; },1500);
+  const inputEl=e.target; const filesRaw=Array.from(inputEl.files||[]);
+  $('fileChosen').textContent = filesRaw.length? `📁 ${filesRaw.length} fichier(s): ${filesRaw.map(f=>f.name).join(', ')}` : '';
   if(!filesRaw.length) return; if(isUploadingLocal) return; isUploadingLocal=true; if(!soundUnlocked) unlockSound();
   const files=[]; for(const f of filesRaw){ if(isDuplicate(f)){ log(`⏭️ Doublon iPhone bloqué: ${f.name}`,'warn'); continue; } files.push(f); }
   if(!files.length){ isUploadingLocal=false; return; }
@@ -254,6 +264,7 @@ fileInput.addEventListener('change', async (e)=>{
     const locals=tracks.filter(t=>t.local);
     for(const lb of locals){ if(lb.url.startsWith('blob:')){ try{ URL.revokeObjectURL(lb.url); }catch{} } }
     isUploadingLocal=false; await loadFiles(true); log(`✅ Sync finie - ${files.length} fichier(s)`,'good'); pushSync('newLocal');
+    e.target.value=''; $('fileChosen').textContent='';
   },2000);
 });
 clearBtn.addEventListener('click',async()=>{
@@ -271,7 +282,6 @@ loveBtn.addEventListener('click',()=>{
     loveCast.style.display='block'; loveIframe.src='https://www.loveradio.ru/'; loveBtn.classList.add('active'); isLove=true; log('🌐 LOVE SITE ouvert','good'); setTimeout(()=>{ loveCast.scrollIntoView({behavior:'smooth'}); },300);
   } else { hideLoveCast(); log('🌐 LOVE SITE fermé','warn'); }
 });
-// AUTH YT
 async function checkCookies(){
   try{
     const r=await fetch('/api/cookies'); const j=await r.json();
@@ -281,10 +291,10 @@ async function checkCookies(){
 }
 async function uploadCookies(){
   const f=$('cookieFile').files[0];
-  if(!f) return alert('Choisis cookies.txt');
+  if(!f) return alert('Choisis cookies.txt d\'abord');
   const fd=new FormData(); fd.append('file', f);
   const r=await fetch('/api/cookies',{method:'POST',body:fd}); const j=await r.json();
-  if(j.ok){ log('✅ YT Sign In OK - clips VEVO débloqués','good'); checkCookies(); }
+  if(j.ok){ log('✅ YT Sign In OK - clips VEVO débloqués','good'); checkCookies(); $('cookieFile').value=''; }
   else{ log('❌ Cookie upload échoué','err'); }
 }
 async function deleteCookies(){
@@ -293,6 +303,7 @@ async function deleteCookies(){
 }
 $('cookieBtn').addEventListener('click',uploadCookies);
 $('cookieDelBtn').addEventListener('click',deleteCookies);
+$('cookieFile').addEventListener('change',()=>{ if($('cookieFile').files[0]) log('📁 cookies.txt prêt: '+$('cookieFile').files[0].name,'good'); });
 
 function handleSyncData(d){
   if(!d ||!d.ts || d.ts<=lastTs) return; lastTs=d.ts;
@@ -314,7 +325,7 @@ function handleSyncData(d){
 window.addEventListener('storage',(e)=>{ if(e.key==='divinarvis_sync'){ try{ handleSyncData(JSON.parse(e.newValue)); }catch{} }});
 setInterval(async()=>{ try{ let r=await fetch('/api/portal/sync'); if(!r.ok) r=await fetch('/api/sync'); if(r.ok){ const d=await r.json(); handleSyncData(d); } await loadFiles(false); }catch{} },3000);
 loadFiles(true); checkCookies();
-log('DIVINARVIS V8.11.0 + AUTH FIX READY','good');
+log('DIVINARVIS V8.11.0 OLGA + FILES ARRANGÉ READY','good');
 </script>
 </body>
 </html>
