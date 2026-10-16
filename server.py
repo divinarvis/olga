@@ -1,4 +1,4 @@
-# V13 - LIST FORMATS & TAKE WHAT EXISTS - euuvveMhWsc FIX
+# V13 - LIST FORMATS & TAKE WHAT EXISTS - FIX euuvveMhWsc / 535RMiijAKY
 from flask import Flask, request, jsonify, send_from_directory
 import pathlib, re, os, json, yt_dlp
 app = Flask(__name__)
@@ -60,16 +60,6 @@ def cookies_api():
     f.save(COOKIE_FILE)
     return jsonify({"ok":True})
 
-@app.route("/api/youtube/formats", methods=["POST"])
-def list_formats():
-    url=clean((request.get_json() or {}).get("url") or "")
-    opts={'cookiefile':str(COOKIE_FILE)} if COOKIE_FILE.exists() else {}
-    opts.update({'quiet':True,'noplaylist':True})
-    with yt_dlp.YoutubeDL(opts) as ydl:
-        info=ydl.extract_info(url, download=False)
-        fmts=[f"{f['format_id']} - {f.get('ext')} - {f.get('vcodec')}/{f.get('acodec')} - {f.get('height')}p" for f in info.get('formats',[])]
-        return jsonify({"formats":fmts, "title":info.get('title')})
-
 @app.route("/api/youtube", methods=["POST"])
 def youtube():
     url=clean((request.get_json() or {}).get("url") or "")
@@ -80,38 +70,31 @@ def youtube():
         'noplaylist': True,
         'nocheckcertificate': True,
         'quiet': False,
-        'extractor_args': {'youtube': {'player_client': ['web']}}, # WEB SEUL = pas besoin PO token
+        'extractor_args': {'youtube': {'player_client': ['web']}},
         'postprocessors': [{'key':'FFmpegExtractAudio','preferredcodec':'mp3','preferredquality':'192'}],
     }
     if COOKIE_FILE.exists(): base['cookiefile']=str(COOKIE_FILE)
 
-    # ETAPE 1: ON REGARDE CE QUE YT DONNE VRAIMENT
+    # LIST FORMATS D'ABORD
     try:
         with yt_dlp.YoutubeDL({**base, 'quiet':True}) as ydl:
             info=ydl.extract_info(url, download=False)
-            fmts=info.get('formats',[])
-            print(f"AVAILABLE FORMATS for {url}: {[f['format_id'] for f in fmts]}")
+            print(f"AVAILABLE FORMATS: {[f['format_id'] for f in info.get('formats',[])]}")
     except Exception as e:
         print(f"LIST FAIL: {e}")
 
-    # ETAPE 2: ON TELECHARGE AVEC CE QUI EXISTE - PAS DE FILTRE EXT
-    ydl_opts={**base, 'format': 'bestaudio/best', 'format_sort': ['hasaud']}
-    # Si bestaudio n'existe pas (cas 18 seulement), best = 18 va passer
-
-    try:
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info=ydl.extract_info(url, download=True)
-            return jsonify({"ok":True,"title":info.get('title'), "used_format": ydl_opts['format']})
-    except Exception as e:
-        # DERNIER RECOURS: format le plus pourri qui existe
-        print(f"TRY bestaudio/best FAILED: {e}, trying 18/best")
-        ydl_opts['format']='best'
+    for fmt in ['bestaudio/best', 'best', 'b']:
         try:
-            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            print(f"TRYING FORMAT {fmt}")
+            with yt_dlp.YoutubeDL({**base, 'format': fmt}) as ydl:
                 info=ydl.extract_info(url, download=True)
                 return jsonify({"ok":True,"title":info.get('title')})
-        except Exception as e2:
-            return jsonify({"ok":False,"error":str(e2)}),500
+        except Exception as e:
+            print(f"FAIL {fmt}: {e}")
+            last=str(e)
+            continue
+
+    return jsonify({"ok":False,"error":last}),500
 
 @app.route("/api/version")
 def version(): return jsonify({"v":"V13 LIST FORMATS"})
