@@ -21,7 +21,7 @@ def clean_url(u):
 def index():
     if (BASE / "index.html").exists():
         return send_from_directory(".", "index.html")
-    return "SFBP LIVE - ajoute index.html"
+    return "SFBP LIVE"
 
 @app.route("/<path:path>")
 def static_files(path):
@@ -46,29 +46,54 @@ def list_files():
 def serve_file(filename):
     return send_from_directory(DOWNLOAD_DIR, filename)
 
+# --- UPLOAD MP3 ---
 @app.route("/api/upload", methods=["POST"])
 def upload():
+    f = request.files.get('file')
+    if not f: return jsonify({"ok": False}), 400
+    name = f.filename.split("\\")[-1].split("/")[-1]
+    f.save(DOWNLOAD_DIR / name)
+    return jsonify({"ok": True})
+
+# --- UPLOAD COOKIES.TXT DEPUIS PHONE ---
+@app.route("/api/cookies/upload", methods=["POST"])
+def upload_cookies():
     try:
-        f = request.files.get('file')
-        if not f:
-            return jsonify({"ok": False, "error": "no file"}), 400
-        name = f.filename.split("\\")[-1].split("/")[-1]
-        f.save(DOWNLOAD_DIR / name)
-        return jsonify({"ok": True, "file": name})
+        # Via fichier
+        if 'file' in request.files:
+            f = request.files['file']
+            content = f.read().decode('utf-8', errors='ignore')
+        else:
+            # Via texte collé
+            data = request.get_json(force=True) or {}
+            content = data.get('content','')
+
+        if "# Netscape HTTP Cookie File" not in content and "youtube.com" not in content.lower():
+            # on accepte quand même mais on prévient
+            print("Cookies file seems invalid", flush=True)
+
+        with open(BASE / "cookies.txt", "w", encoding="utf-8") as out:
+            out.write(content)
+
+        return jsonify({"ok": True, "msg": f"cookies.txt saved {len(content)} bytes"})
     except Exception as e:
+        traceback.print_exc()
         return jsonify({"ok": False, "error": str(e)}), 500
+
+@app.route("/api/cookies/status")
+def cookies_status():
+    p = BASE / "cookies.txt"
+    if p.exists():
+        return jsonify({"ok": True, "exists": True, "size": p.stat().st_size})
+    return jsonify({"ok": True, "exists": False})
 
 @app.route("/api/delete", methods=["POST"])
 def delete():
-    try:
-        data = request.get_json(force=True) or {}
-        fname = data.get("file","").split("\\")[-1].split("/")[-1]
-        p = DOWNLOAD_DIR / fname
-        if p.exists():
-            p.unlink()
-        return jsonify({"ok": True})
-    except Exception as e:
-        return jsonify({"ok": False, "error": str(e)}), 500
+    data = request.get_json(force=True) or {}
+    fname = data.get("file","").split("\\")[-1].split("/")[-1]
+    p = DOWNLOAD_DIR / fname
+    if p.exists(): p.unlink()
+    return jsonify({"ok": True})
 
 @app.route("/api/sync", methods=["GET","POST"])
 @app.route("/api/portal/sync", methods=["GET","POST"])
@@ -87,10 +112,6 @@ def yt():
         url = urllib.parse.unquote(url)
         url = clean_url(url)
         print(f"FINAL URL: {url}", flush=True)
-
-        if not url:
-            return jsonify({"ok": False, "error": "no url"}), 400
-
         import yt_dlp
         opts = {
             'format': 'bestaudio/best',
@@ -99,27 +120,18 @@ def yt():
             'nocheckcertificate': True,
             'js_runtimes': {'deno': {}},
             'remote_components': ['ejs:github'],
-            'extractor_args': {
-                'youtube': {
-                    'player_client': ['ios', 'android', 'mweb', 'web', 'tv_embedded'],
-                    'player_skip': ['webpage', 'configs'],
-                }
-            },
+            'extractor_args': {'youtube': {'player_client': ['ios','android','mweb','web','tv_embedded'], 'player_skip': ['webpage','configs']}},
         }
-        # Si cookies.txt existe, on l'utilise
         if os.path.exists("cookies.txt"):
             opts['cookiefile'] = 'cookies.txt'
             print("Using cookies.txt", flush=True)
-        else:
-            print("NO cookies.txt - trying without", flush=True)
 
         with yt_dlp.YoutubeDL(opts) as ydl:
             info = ydl.extract_info(url, download=True)
-
         return jsonify({"ok": True, "title": info.get('title')})
     except Exception as e:
         traceback.print_exc()
-        return jsonify({"ok": False, "error": f"{str(e)}"}), 500
+        return jsonify({"ok": False, "error": str(e)}), 500
 
 @app.route("/api/youtube", methods=["POST","GET"])
 def yt_compat():
@@ -135,12 +147,7 @@ def yt_compat():
                 'nocheckcertificate': True,
                 'js_runtimes': {'deno': {}},
                 'remote_components': ['ejs:github'],
-                'extractor_args': {
-                    'youtube': {
-                        'player_client': ['ios', 'android', 'mweb', 'web', 'tv_embedded'],
-                        'player_skip': ['webpage', 'configs'],
-                    }
-                },
+                'extractor_args': {'youtube': {'player_client': ['ios','android','mweb','web','tv_embedded'], 'player_skip': ['webpage','configs']}},
             }
             if os.path.exists("cookies.txt"):
                 opts['cookiefile'] = 'cookies.txt'
@@ -148,7 +155,6 @@ def yt_compat():
                 info = ydl.extract_info(url, download=True)
             return jsonify({"ok": True, "title": info.get('title')})
         except Exception as e:
-            traceback.print_exc()
             return jsonify({"ok": False, "error": str(e)}), 500
     else:
         return yt()
