@@ -1,4 +1,4 @@
-# V10.5 BLITZKRIEG - YT FIX ALL ERRORS
+# V10.6 - FORMAT YT NATIF - PASSE PARTOUT
 from flask import Flask, request, jsonify, send_from_directory
 import pathlib, re, os, json, yt_dlp
 app = Flask(__name__)
@@ -58,29 +58,36 @@ def upload():
 def youtube():
     url=clean((request.get_json() or {}).get("url") or "")
     if not url: return jsonify({"ok":False,"error":"no url"}),400
-    cookie=None
-    for n in ["cookies.txt"]:
-        p=BASE / n
-        if p.exists(): cookie=str(p); break
-    opts={
-        'format': 'ba/b',
+    
+    # FORMAT YT NATIF = comme l'app YouTube Android
+    base_opts={
         'outtmpl': str(UPLOAD_DIR / '%(title)s.%(ext)s'),
         'noplaylist': True,
         'nocheckcertificate': True,
-        'extractor_args': {'youtube': {'player_client': ['android_music','android','ios','web']}},
+        'extractor_args': {'youtube': {'player_client': ['android','ios']}},
         'postprocessors': [{'key':'FFmpegExtractAudio','preferredcodec':'mp3','preferredquality':'192'}],
         'retries': 5,
-        'fragment_retries': 5,
         'quiet': True,
     }
-    if cookie: opts['cookiefile']=cookie
-    try:
-        with yt_dlp.YoutubeDL(opts) as ydl:
-            info=ydl.extract_info(url, download=True)
-            return jsonify({"ok":True,"title":info.get('title')})
-    except Exception as e:
-        print(f"YT FAIL: {e}")
-        return jsonify({"ok":False,"error":str(e)}),500
+
+    # ESSAI 1: format le plus large (opus, m4a, tout)
+    # ESSAI 2: si échec, best tout court (comme YT)
+    for fmt in ['bestaudio/best', 'ba/b', 'b']:
+        opts = {**base_opts, 'format': fmt}
+        try:
+            with yt_dlp.YoutubeDL(opts) as ydl:
+                info=ydl.extract_info(url, download=True)
+                return jsonify({"ok":True,"title":info.get('title')})
+        except Exception as e:
+            if "Requested format is not available" in str(e):
+                print(f"Format {fmt} fail, retry...")
+                continue
+            else:
+                print(f"YT FAIL {fmt}: {e}")
+                # dernier essai quand même
+                if fmt == 'b': return jsonify({"ok":False,"error":str(e)}),500
+                continue
+    return jsonify({"ok":False,"error":"all formats failed"}),500
 
 @app.route("/api/youtube/stop", methods=["POST"])
 @app.route("/api/youtube/cancel", methods=["POST"])
