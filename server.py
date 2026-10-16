@@ -1,4 +1,4 @@
-# V14 - AVEC TON BLOC YOUTUBE bestaudio/best - FIX euuvve
+# V15 - TON OPTS bestaudio/best + default + web_embedded
 from flask import Flask, request, jsonify, send_from_directory
 import pathlib, re, os, json, yt_dlp
 
@@ -12,12 +12,9 @@ if not SYNC_FILE.exists():
     SYNC_FILE.write_text('{"ts":0}', encoding='utf-8')
 
 def clean_yt_url(u):
-    if not u:
-        return ""
+    if not u: return ""
     m=re.search(r'(?:v=|youtu\.be/|shorts/)([A-Za-z0-9_-]{11})', u)
     return f"https://www.youtube.com/watch?v={m.group(1)}" if m else u
-
-def clean(u): return clean_yt_url(u)
 
 @app.route("/")
 def index(): return send_from_directory(str(BASE), "index.html")
@@ -66,39 +63,36 @@ def cookies_api():
     f.save(COOKIE_FILE)
     return jsonify({"ok":True})
 
-# --- TON BLOC EXACT ---
 @app.route('/api/youtube', methods=['POST'])
 def youtube():
     data = request.get_json() or {}
     url = clean_yt_url(data.get("url", ""))
     if not url:
         return jsonify({"ok": False, "error": "URL manquante"}), 400
-    
+
     cookie = None
     for n in ["cookies.txt", "www.youtube.com_cookies.txt"]:
         p = BASE / n
         if p.exists():
             cookie = str(p)
             break
-            
+
     opts = {
-        # 'bestaudio/best' permet de capturer n'importe quel flux audio disponible
         'format': 'bestaudio/best',
         'outtmpl': str(UPLOAD_DIR / '%(title)s.%(ext)s'),
         'noplaylist': True,
         'nocheckcertificate': True,
+        'extractor_args': {'youtube': {'player_client': ['default', 'web_embedded']}},
         'postprocessors': [{
             'key': 'FFmpegExtractAudio',
             'preferredcodec': 'mp3',
             'preferredquality': '192',
-        }],
-        # Evite les erreurs de format strict
-        'ignoreerrors': False,
+        }]
     }
-    
+
     if cookie:
         opts['cookiefile'] = cookie
-        
+
     try:
         with yt_dlp.YoutubeDL(opts) as ydl:
             info = ydl.extract_info(url, download=True)
@@ -109,7 +103,7 @@ def youtube():
         return jsonify({"ok": False, "error": str(e)[:800]}), 500
 
 @app.route("/api/version")
-def version(): return jsonify({"v":"V14 TON BLOC bestaudio/best"})
+def version(): return jsonify({"v":"V15 bestaudio/best + web_embedded"})
 @app.route("/api/youtube/stop", methods=["POST"])
 @app.route("/api/youtube/cancel", methods=["POST"])
 @app.route("/api/stop", methods=["POST"])
