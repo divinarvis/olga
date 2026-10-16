@@ -1,5 +1,0 @@
-yt-dlp
-requests
-Flask
-Flask-Cors
-yt-dlp[default]
