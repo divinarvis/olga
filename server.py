@@ -1,4 +1,4 @@
-# V15 - TON OPTS bestaudio/best + default + web_embedded
+# V16 - FIX "The page needs to be reloaded" - euuvveMhWsc VEVO
 from flask import Flask, request, jsonify, send_from_directory
 import pathlib, re, os, json, yt_dlp
 
@@ -77,33 +77,52 @@ def youtube():
             cookie = str(p)
             break
 
-    opts = {
-        'format': 'bestaudio/best',
-        'outtmpl': str(UPLOAD_DIR / '%(title)s.%(ext)s'),
-        'noplaylist': True,
-        'nocheckcertificate': True,
-        'extractor_args': {'youtube': {'player_client': ['default', 'web_embedded']}},
-        'postprocessors': [{
-            'key': 'FFmpegExtractAudio',
-            'preferredcodec': 'mp3',
-            'preferredquality': '192',
-        }]
-    }
+    # On teste plusieurs clients, un va débloquer euuvve
+    clients_to_try = [
+        ['web_embedded'],
+        ['web'],
+        ['ios'],
+        ['web', 'web_embedded'],
+        ['web_safari', 'web'],
+    ]
 
-    if cookie:
-        opts['cookiefile'] = cookie
+    last_err = ""
+    for client in clients_to_try:
+        opts = {
+            'format': 'bestaudio/best',
+            'outtmpl': str(UPLOAD_DIR / '%(title)s.%(ext)s'),
+            'noplaylist': True,
+            'nocheckcertificate': True,
+            'extractor_args': {'youtube': {'player_client': client}},
+            'postprocessors': [{
+                'key': 'FFmpegExtractAudio',
+                'preferredcodec': 'mp3',
+                'preferredquality': '192',
+            }],
+            'quiet': False,
+        }
+        if cookie:
+            opts['cookiefile'] = cookie
 
-    try:
-        with yt_dlp.YoutubeDL(opts) as ydl:
-            info = ydl.extract_info(url, download=True)
-            title = info.get('title', 'audio') if info else 'audio'
-            return jsonify({"ok": True, "title": title})
-    except Exception as e:
-        print(e)
-        return jsonify({"ok": False, "error": str(e)[:800]}), 500
+        try:
+            print(f"TRYING CLIENT {client} for {url}")
+            with yt_dlp.YoutubeDL(opts) as ydl:
+                info = ydl.extract_info(url, download=True)
+                title = info.get('title', 'audio') if info else 'audio'
+                print(f"SUCCESS WITH CLIENT {client}")
+                return jsonify({"ok": True, "title": title, "client": str(client)})
+        except Exception as e:
+            last_err = str(e)
+            print(f"FAIL CLIENT {client}: {e}")
+            if "needs to be reloaded" in last_err or "Sign in" in last_err:
+                continue
+            if "Requested format" in last_err:
+                continue
+
+    return jsonify({"ok": False, "error": last_err[:800]}), 500
 
 @app.route("/api/version")
-def version(): return jsonify({"v":"V15 bestaudio/best + web_embedded"})
+def version(): return jsonify({"v":"V16 multi-client fix reload"})
 @app.route("/api/youtube/stop", methods=["POST"])
 @app.route("/api/youtube/cancel", methods=["POST"])
 @app.route("/api/stop", methods=["POST"])
