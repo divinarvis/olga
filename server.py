@@ -1,4 +1,4 @@
-# V10.6 - FORMAT YT NATIF - PASSE PARTOUT
+# V10.7 - AUTH LEGIT - SIGN IN YT
 from flask import Flask, request, jsonify, send_from_directory
 import pathlib, re, os, json, yt_dlp
 app = Flask(__name__)
@@ -6,6 +6,7 @@ BASE = pathlib.Path(__file__).parent
 UPLOAD_DIR = BASE / "uploads"
 UPLOAD_DIR.mkdir(exist_ok=True)
 SYNC_FILE = BASE / "sync.json"
+COOKIE_FILE = BASE / "cookies.txt"
 if not SYNC_FILE.exists(): SYNC_FILE.write_text('{"ts":0}', encoding='utf-8')
 
 def clean(u):
@@ -45,49 +46,47 @@ def upload():
     if not f: return jsonify({"ok":False}),400
     safe=re.sub(r'[\\/]+','_', f.filename or "audio.mp3")
     dest=UPLOAD_DIR / safe
-    i=1
-    b=safe
+    i=1; b=safe
     while dest.exists():
         name,ext=os.path.splitext(b)
-        dest=UPLOAD_DIR / f"{name}_{i}{ext}"
-        i+=1
+        dest=UPLOAD_DIR / f"{name}_{i}{ext}"; i+=1
     f.save(dest)
     return jsonify({"ok":True,"file":dest.name})
+
+# NOUVEAU: Upload du cookies.txt via l'interface
+@app.route("/api/cookies", methods=["POST","GET","DELETE"])
+def cookies_api():
+    if request.method=="GET":
+        return jsonify({"has_cookies": COOKIE_FILE.exists(), "size": COOKIE_FILE.stat().st_size if COOKIE_FILE.exists() else 0})
+    if request.method=="DELETE":
+        if COOKIE_FILE.exists(): COOKIE_FILE.unlink()
+        return jsonify({"ok":True})
+    f=request.files.get("file") or request.files.get("cookies")
+    if not f: return jsonify({"ok":False,"error":"no file"}),400
+    f.save(COOKIE_FILE)
+    return jsonify({"ok":True,"message":"Sign in OK"})
 
 @app.route("/api/youtube", methods=["POST"])
 def youtube():
     url=clean((request.get_json() or {}).get("url") or "")
     if not url: return jsonify({"ok":False,"error":"no url"}),400
-    
-    # FORMAT YT NATIF = comme l'app YouTube Android
-    base_opts={
+    opts={
+        'format': 'bestaudio/best',
         'outtmpl': str(UPLOAD_DIR / '%(title)s.%(ext)s'),
         'noplaylist': True,
         'nocheckcertificate': True,
         'extractor_args': {'youtube': {'player_client': ['android','ios']}},
         'postprocessors': [{'key':'FFmpegExtractAudio','preferredcodec':'mp3','preferredquality':'192'}],
-        'retries': 5,
         'quiet': True,
     }
-
-    # ESSAI 1: format le plus large (opus, m4a, tout)
-    # ESSAI 2: si échec, best tout court (comme YT)
-    for fmt in ['bestaudio/best', 'ba/b', 'b']:
-        opts = {**base_opts, 'format': fmt}
-        try:
-            with yt_dlp.YoutubeDL(opts) as ydl:
-                info=ydl.extract_info(url, download=True)
-                return jsonify({"ok":True,"title":info.get('title')})
-        except Exception as e:
-            if "Requested format is not available" in str(e):
-                print(f"Format {fmt} fail, retry...")
-                continue
-            else:
-                print(f"YT FAIL {fmt}: {e}")
-                # dernier essai quand même
-                if fmt == 'b': return jsonify({"ok":False,"error":str(e)}),500
-                continue
-    return jsonify({"ok":False,"error":"all formats failed"}),500
+    if COOKIE_FILE.exists():
+        opts['cookiefile']=str(COOKIE_FILE)
+    try:
+        with yt_dlp.YoutubeDL(opts) as ydl:
+            info=ydl.extract_info(url, download=True)
+            return jsonify({"ok":True,"title":info.get('title')})
+    except Exception as e:
+        return jsonify({"ok":False,"error":str(e)}),500
 
 @app.route("/api/youtube/stop", methods=["POST"])
 @app.route("/api/youtube/cancel", methods=["POST"])
