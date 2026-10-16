@@ -1,20 +1,17 @@
-# server.py V10.3 - FIX 403 FORBIDDEN - FORCE ANDROID + PO_TOKEN
+# server.py V10.4 - FIX FORMAT NOT AVAILABLE
 from flask import Flask, request, jsonify, send_from_directory
 import pathlib, re, os, json
 import yt_dlp
-
 app = Flask(__name__)
 BASE = pathlib.Path(__file__).parent
 UPLOAD_DIR = BASE / "uploads"
 UPLOAD_DIR.mkdir(exist_ok=True)
 SYNC_FILE = BASE / "sync.json"
-if not SYNC_FILE.exists():
-    SYNC_FILE.write_text('{"ts":0}', encoding='utf-8')
+if not SYNC_FILE.exists(): SYNC_FILE.write_text('{"ts":0}', encoding='utf-8')
 
 def clean_yt_url(u):
     m = re.search(r'(?:v=|youtu\.be/|shorts/)([A-Za-z0-9_-]{11})', u or '')
-    if m:
-        return f"https://www.youtube.com/watch?v={m.group(1)}"
+    if m: return f"https://www.youtube.com/watch?v={m.group(1)}"
     return u
 
 @app.route("/")
@@ -37,10 +34,7 @@ def sync():
 
 @app.route("/api/files")
 def files():
-    result=[]
-    for f in UPLOAD_DIR.glob("*"):
-        if f.is_file(): result.append({"name": f.name, "url": f"/uploads/{f.name}"})
-    return jsonify(result)
+    return jsonify([{"name": f.name, "url": f"/uploads/{f.name}"} for f in UPLOAD_DIR.glob("*") if f.is_file()])
 
 @app.route("/api/delete", methods=["POST"])
 def delete_file():
@@ -68,42 +62,27 @@ def upload():
 
 @app.route("/api/youtube", methods=["POST"])
 def youtube():
-    data=request.get_json() or {}
-    url=clean_yt_url(data.get("url") or "")
+    url=clean_yt_url((request.get_json() or {}).get("url") or "")
     if not url: return jsonify({"ok":False, "error":"no url"}),400
-
     cookie=None
     for n in ["cookies.txt","www.youtube.com_cookies.txt"]:
         p=BASE / n
         if p.exists(): cookie=str(p); break
 
-    # FIX 403 : FORCE ANDROID CLIENT + PO_TOKEN via bgutil
     opts={
-        'format': 'bestaudio[ext=m4a]/bestaudio/best',
+        'format': 'bestaudio/best',  # FIX: plus permissif
         'outtmpl': str(UPLOAD_DIR / '%(title)s.%(ext)s'),
         'noplaylist': True,
         'nocheckcertificate': True,
-        'extractor_args': {
-            'youtube': {
-                'player_client': ['android_music','android','ios'],
-                'po_token': ['android_music+android.embeds'],
-            }
-        },
-        'http_headers': {
-            'User-Agent': 'com.google.android.youtube/19.09.37 (Linux; U; Android 11) gzip',
-        },
+        'extractor_args': {'youtube': {'player_client': ['android_music','android','ios']}},
         'postprocessors':[{'key':'FFmpegExtractAudio','preferredcodec':'mp3','preferredquality':'192'}],
-        'retries': 3,
-        'fragment_retries': 3,
     }
     if cookie: opts['cookiefile']=cookie
-
     try:
         with yt_dlp.YoutubeDL(opts) as ydl:
             info=ydl.extract_info(url, download=True)
             return jsonify({"ok":True, "title": info.get('title')})
     except Exception as e:
-        print(f"YT 403 ERROR: {e}")
         return jsonify({"ok":False, "error": str(e)}),500
 
 @app.route("/api/youtube/stop", methods=["POST"])
@@ -112,5 +91,4 @@ def youtube():
 @app.route("/api/kill", methods=["POST"])
 def stop_dummy(): return jsonify({"ok":True})
 
-if __name__=="__main__":
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT",8000)))
+if __name__=="__main__": app.run(host="0.0.0.0", port=int(os.environ.get("PORT",8000)))
