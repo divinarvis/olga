@@ -1,50 +1,50 @@
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, request, jsonify
 from flask_cors import CORS
-import yt_dlp, re, pathlib, glob
+import traceback, pathlib, re, glob
 
 app = Flask(__name__)
 CORS(app)
-DOWNLOAD_DIR = pathlib.Path("downloads")
-DOWNLOAD_DIR.mkdir(exist_ok=True)
 
-def clean_url(u):
-    m = re.search(r'(?:v=|youtu\.be/|shorts/)([A-Za-z0-9_-]{11})', u or '')
-    return f"https://www.youtube.com/watch?v={m.group(1)}" if m else u
+@app.route("/")
+def home():
+    return "SFBP LIVE"
 
-CLIENTS = [['ios'], ['web_safari','ios'], ['tv_embedded'], ['web','ios']]
+@app.route("/api/yt")
+def yt():
+    try:
+        url = request.args.get('url','')
+        print(f"YT REQUEST: {url}")
+        if not url:
+            return jsonify({"ok":False,"error":"no url"}), 400
 
-def download_yt(url):
-    url = clean_url(url)
-    for client in CLIENTS:
+        import yt_dlp
+        DOWNLOAD_DIR = pathlib.Path("downloads")
+        DOWNLOAD_DIR.mkdir(exist_ok=True)
+
+        m = re.search(r'(?:v=|youtu\.be/|shorts/)([A-Za-z0-9_-]{11})', url)
+        if m:
+            url = f"https://www.youtube.com/watch?v={m.group(1)}"
+
         opts = {
-            'format': 'bestaudio[ext=m4a]/bestaudio/best',
+            'format': 'bestaudio/best',
             'outtmpl': str(DOWNLOAD_DIR / '%(title)s.%(ext)s'),
             'noplaylist': True,
             'nocheckcertificate': True,
-            'extractor_args': {'youtube': {'player_client': client}},
+            'extractor_args': {'youtube': {'player_client': ['ios']}},
             'remote_components': ['ejs:github'],
-            'postprocessors': [{'key': 'FFmpegExtractAudio','preferredcodec':'mp3','preferredquality':'192'}],
         }
-        if pathlib.Path("cookies.txt").exists():
+
+        import os
+        if os.path.exists("cookies.txt"):
             opts['cookiefile'] = 'cookies.txt'
+            print("USING COOKIES")
+
         with yt_dlp.YoutubeDL(opts) as ydl:
             info = ydl.extract_info(url, download=True)
-            mp3s = sorted(glob.glob(str(DOWNLOAD_DIR / "*.mp3")), key=lambda x: pathlib.Path(x).stat().st_mtime, reverse=True)
-            if mp3s: return mp3s[0], info.get('title','audio')
-    raise Exception("block")
 
-@app.route("/api/yt")
-def api_yt():
-    url = request.args.get('url')
-    mp3_path, title = download_yt(url)
-    return jsonify({"ok": True, "file": pathlib.Path(mp3_path).name})
+        return jsonify({"ok": True, "title": info.get('title')})
 
-@app.route("/api/upload", methods=['POST'])
-def upload():
-    f = request.files.get('file')
-    (DOWNLOAD_DIR / f.filename).write_bytes(f.read()) if hasattr(f,'read') else f.save(DOWNLOAD_DIR / f.filename)
-    return jsonify({"ok": True})
-
-if __name__ == "__main__":
-    import os
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 10000)))
+    except Exception as e:
+        print("ERROR YT:", e)
+        traceback.print_exc()
+        return jsonify({"ok": False, "error": str(e)}), 500
