@@ -13,13 +13,11 @@ ALLOWED = {".mp3",".m4a",".wav",".aac",".mp4",".ogg",".flac",".jpg",".jpeg",".pn
 last_sync = {"ts":0, "action":"idle"}
 
 def clean_filename(name):
-    """Conserve les accents et caractères propres tout en sécurisant le fichier"""
     name = os.path.basename(name)
     name = re.sub(r'[^\w\s\-\.\(\)\[\]àâäéèêëîïôöùûüçÀÂÄÉÈÊËÎÏÔÖÙÛÜÇа-яА-ЯёЁ]', '_', name)
     return re.sub(r'\s+', ' ', name).strip()
 
-HTML = r"""
-<!doctype html>
+HTML = r"""<!doctype html>
 <html lang="fr">
 <head>
 <meta charset="utf-8">
@@ -65,7 +63,7 @@ button,input{font:inherit}button{cursor:pointer}
 <div>
 <article class="card profile">
   <div class="portraitWrap">
-    <img class="portrait" src="/static/olga.jpg" onerror="this.src='/static/uploads/olga.jpg'; this.onerror=function(){this.src='/static/olga.png';}" alt="OLGA">
+    <img class="portrait" src="/static/olga.jpg" onerror="this.src='/static/olga.png'" alt="OLGA">
   </div>
   <h3>OLGA</h3>
   <div class="tag">DIVINARVIS MUSE</div>
@@ -76,7 +74,7 @@ button,input{font:inherit}button{cursor:pointer}
 <div>
 <article class="card"><div class="cardHeader"><h2>Media Control</h2><small id="liveHint" style="color:var(--muted)">SON BLOQUÉ</small></div><div class="player">
 <div class="now">
-  <img id="cover" class="cover" src="/static/olga.jpg" onerror="this.src='/static/uploads/olga.jpg'; this.onerror=function(){this.src='/static/olga.png';}">
+  <img id="cover" class="cover" src="/static/olga.jpg" onerror="this.src='/static/olga.png'">
   <div><div class="nowTitle" id="title">Son bloqué</div><div class="nowMeta" id="meta">Clique pour activer.</div></div>
 </div>
 <audio id="audio" playsinline preload="metadata" crossorigin="anonymous"></audio>
@@ -135,22 +133,9 @@ let ytAbort=null, ytDownloading=false;
 let trueNameMemory = new Map();
 let recentUploads = [];
 
-try{ const saved = JSON.parse(localStorage.getItem('divinarvis_true_names')||'{}'); for(const k in saved){ trueNameMemory.set(k, saved[k]); } log(`📦 Mémoire: ${trueNameMemory.size} noms`, 'good'); }catch{}
+try{ const saved = JSON.parse(localStorage.getItem('divinarvis_true_names')||'{}'); for(const k in saved){ trueNameMemory.set(k, saved[k]); } }catch{}
 function saveMemory(){ try{ const obj={}; for(const [k,v] of trueNameMemory){ obj[k]=v; } localStorage.setItem('divinarvis_true_names', JSON.stringify(obj)); }catch{} }
 const seenSignatures = new Map();
 function makeSig(file){ return `${file.name}::${file.size}::${file.lastModified}`; }
 function isDuplicate(file){ const sig=makeSig(file); const now=Date.now(); for(const [k,t] of seenSignatures){ if(now-t>15000) seenSignatures.delete(k); } if(seenSignatures.has(sig)) return true; seenSignatures.set(sig, now); return false; }
-function safeDecode(str){ if(!str) return ""; if(str.indexOf('%')===-1) return str; try{ let d=str; for(let i=0;i<4;i++){ try{ const n=decodeURIComponent(d); if(n===d) break; d=n; }catch{ break; } } return d; }catch{ return str; } }
-function getDisplayNameFromServer(raw){ if(!raw) return "audio.mp3"; let n=raw.trim(); n=safeDecode(n); n=n.split('\\').pop().split('/').pop(); return n.trim(); }
-function getTrueLocalName(file){ if(!file||!file.name) return "audio.mp3"; return file.name.replace(/^C:\\fakepath\\/i,"").trim(); }
-function normalizeNameForDedup(name){ return (name||"").toLowerCase().trim(); }
-function formatCount(c,s,p){ return c<=1? `${c} ${s}` : `${c} ${p}`; }
-
-function unlockSound(){if(soundUnlocked) return; soundUnlocked=true; try{audio.muted=true; const pr=audio.play(); if(pr) pr.then(()=>{audio.pause(); audio.muted=false;}).catch(()=>{audio.muted=false;});}catch{} soundGate.classList.add('hide'); soundState.textContent='🔊 ACTIF'; soundState.style.color='#4ade80'; hint.textContent='SON ACTIF'; log('🔊 SON ACTIVÉ','good'); localStorage.setItem('divinarvis_sound','1');}
-gateBtn.addEventListener('click', unlockSound); if(localStorage.getItem('divinarvis_sound')==='1'){ unlockSound(); }
-
-function updateActionButtonsVisibility(){ const hasTracks=tracks.length>0; killYTBtn.style.display=(hasTracks||ytDownloading)?'block':'none'; }
-function render(){
-  playlistEl.innerHTML=''; if(!tracks.length){ playlistEl.innerHTML='<div style="padding:22px;text-align:center;color:var(--muted);font-size:13px">Aucune piste.</div>'; trackCount.textContent=formatCount(0,'morceau','morceaux'); trackCount2.textContent=formatCount(0,'piste','pistes'); syncStatus.textContent='VIDE'; updateActionButtonsVisibility(); return; }
-  tracks.forEach((t,i)=>{ let showName=t.name||"Sans nom"; let shortName=showName.length>50? showName.substring(0,42)+'...'+(showName.includes('.')?'.'+showName.split('.').pop():'') : showName; const div=document.createElement('div'); div.className='track'+(i===current?' active':''); div.innerHTML=`<span style="flex:1;cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px" title="${showName.replace(/"/g,'&quot;')}" onclick="window.playIdx(${i},false)">${i+1}. ${shortName}</span><div style="display:flex;gap:6px"><b style="font-size:10px;cursor:pointer" onclick="window.playIdx(${i},false)">PLAY</b><button type="button" class="delBtn" onclick="window.deleteTrack(${i})">🗑️</button></div>`; playlistEl.appendChild(div); });
-  trackCount.textContent=format
+function safeDecode(str){ if(!str) return ""; if(str.indexOf('%')===-1) return str
