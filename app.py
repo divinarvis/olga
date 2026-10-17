@@ -1,6 +1,5 @@
-import os, time, subprocess
+import os, time, subprocess, re
 from flask import Flask, request, jsonify, send_from_directory, render_template_string
-from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 BASE = os.path.dirname(os.path.abspath(__file__))
@@ -13,13 +12,20 @@ os.makedirs(STATIC_FOLDER, exist_ok=True)
 ALLOWED = {".mp3",".m4a",".wav",".aac",".mp4",".ogg",".flac",".jpg",".jpeg",".png",".webp"}
 last_sync = {"ts":0, "action":"idle"}
 
+def clean_filename(name):
+    """Conserve les accents et caractères propres tout en évitant les failles de sécurité"""
+    name = os.path.basename(name)
+    # Remplace les caractères non alphanumériques risqués mais garde les accents, tirets, points et espaces
+    name = re.sub(r'[^\w\s\-\.\(\)\[\]àâäéèêëîïôöùûüçÀÂÄÉÈÊËÎÏÔÖÙÛÜÇ]', '_', name)
+    return re.sub(r'\s+', ' ', name).strip()
+
 HTML = r"""
 <!doctype html>
 <html lang="fr">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>DIVINARVIS V8.17</title>
+<title>DIVINARVIS V17</title>
 <style>
 :root{color-scheme:dark;--bg:#0d0408;--panel:rgba(22,9,16,.9);--panel2:rgba(33,12,23,.86);--line:rgba(244,63,94,.34);--text:#fff1f5;--muted:#c48b9f;--rose:#f43f5e;--violet:#d946ef;--cyan:#00f2ff;--green:#4ade80}
 *{box-sizing:border-box}html,body{margin:0;min-height:100%;background:linear-gradient(180deg,#15060d,#0d0408);color:var(--text);font-family:Inter,-apple-system,sans-serif}
@@ -53,13 +59,13 @@ button,input{font:inherit}button{cursor:pointer}
 </style>
 </head>
 <body>
-<div id="soundGate"><div class="gateCard"><div style="font-size:48px">🔊</div><h2>DIVINARVIS V8.17</h2><div style="color:var(--muted);font-size:13px">OLGA SUPERHERO • LOVE DANS LE PLAYER • NO-RELOAD</div><button class="gateBtn" id="gateBtn">▶️ ACTIVER LE SON</button></div></div>
+<div id="soundGate"><div class="gateCard"><div style="font-size:48px">🔊</div><h2>DIVINARVIS V17</h2><div style="color:var(--muted);font-size:13px">OLGA SUPERHERO • AUTO-REFRESH • UTF-8 FIX</div><button class="gateBtn" id="gateBtn">▶️ ACTIVER LE SON</button></div></div>
 <main class="shell">
-<header class="topbar"><div class="brand"><div class="logo">D</div><div><h1>DIVINARVIS</h1><small>PORTAL V8.17 • FINAL • NO-RELOAD</small></div></div><div class="onlineBox"><i class="dot ok"></i><div><strong id="syncStatus">ONLINE</strong><span style="display:block;color:var(--muted);font-size:11px" id="trackCount">0 morceau</span></div></div></header>
+<header class="topbar"><div class="brand"><div class="logo">D</div><div><h1>DIVINARVIS</h1><small>PORTAL V17 • AUTO-REFRESH ACTIVÉ</small></div></div><div class="onlineBox"><i class="dot ok"></i><div><strong id="syncStatus">ONLINE</strong><span style="display:block;color:var(--muted);font-size:11px" id="trackCount">0 morceau</span></div></div></header>
 <div class="grid">
 <div>
 <article class="card profile"><div class="portraitWrap"><img class="portrait" src="/static/olga.jpg" onerror="this.src='/static/uploads/olga.jpg'; this.onerror=function(){this.src='https://i.pravatar.cc/300?img=5'}" alt="OLGA"></div><h3>OLGA</h3><div style="color:var(--rose);letter-spacing:.16em;font-size:11px">DIVINARVIS SUPERHERO</div><p style="margin:12px auto 0;max-width:320px;color:#ffe4ed;font-style:italic;font-size:13px">« Toujours dans mon système. »</p></article>
-<article class="card" style="margin-top:18px"><div class="cardHeader"><h2>Sync</h2><span style="font-size:11px;color:var(--muted)" id="loopState">LOOP OFF • RANDOM OFF</span></div><div style="padding:16px;display:grid;gap:10px;font-size:13px"><div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Serveur</span><span style="color:var(--green);font-weight:800">ONLINE</span></div><div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Mode</span><span style="color:var(--cyan);font-weight:800">NO-RELOAD 10s</span></div></div></article>
+<article class="card" style="margin-top:18px"><div class="cardHeader"><h2>Sync</h2><span style="font-size:11px;color:var(--muted)" id="loopState">LOOP OFF • RANDOM OFF</span></div><div style="padding:16px;display:grid;gap:10px;font-size:13px"><div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Serveur</span><span style="color:var(--green);font-weight:800">ONLINE</span></div><div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Auto-Refresh</span><span style="color:var(--cyan);font-weight:800">ACTIF (6s)</span></div></div></article>
 <article class="card" style="margin-top:18px"><div class="cardHeader"><h2>Journal</h2><span style="font-size:11px;color:var(--muted)">LIVE</span></div><div class="log" id="log"></div></article>
 </div>
 <div>
@@ -81,10 +87,10 @@ button,input{font:inherit}button{cursor:pointer}
 <div class="track"><span><b>Capital XTRA</b> <small>Hip Hop</small></span><button class="btn primary" style="padding:8px 14px" onclick="playCapital('https://media-ice.musicradio.com/CapitalXTRANationalMP3','Capital XTRA')">▶️</button></div>
 </div></article>
 <article class="card" style="margin-top:18px"><div class="cardHeader"><h2>DIVINARVIS Playlist</h2><span id="trackCount2">0 piste</span></div><div class="playlist" id="playlist"></div><button id="clearShared" class="btn danger" style="width:92%;margin:10px 4%">🗑️ EFFACER TOUTE LA PLAYLIST</button></article>
-<article class="card" style="margin-top:18px"><div class="cardHeader"><h2>Charger</h2><span style="font-size:11px;color:var(--muted)">YT + LOCAL + FIX NOMS iPhone</span></div><div class="uploadBox"><div class="ytBox"><input id="ytInput" class="file" type="text" placeholder="Colle lien YouTube / TikTok"><button id="ytBtn" class="btn primary">YT+</button></div><div id="ytStatus" style="font-size:11px;color:var(--muted)">YT OK • Cookies: <span id="cookieStatus">checking...</span></div><input id="fileInput" class="file" type="file" accept=".mp3,.m4a,.wav,.aac,.mp4,.ogg,.flac" multiple></div></article>
+<article class="card" style="margin-top:18px"><div class="cardHeader"><h2>Charger</h2><span style="font-size:11px;color:var(--muted)">YT + LOCAL + NOMS PROPRES</span></div><div class="uploadBox"><div class="ytBox"><input id="ytInput" class="file" type="text" placeholder="Colle lien YouTube"><button id="ytBtn" class="btn primary">YT+</button></div><div id="ytStatus" style="font-size:11px;color:var(--muted)">YT OK • Cookies: <span id="cookieStatus">checking...</span></div><input id="fileInput" class="file" type="file" accept=".mp3,.m4a,.wav,.aac,.mp4,.ogg,.flac" multiple></div></article>
 <article class="card" style="margin-top:18px"><div class="cardHeader"><h2>🛠️ FIX BOT YouTube</h2><span style="font-size:11px;color:#f0abfc">Phone + Watch</span></div><div class="uploadBox"><div class="cookiesBox"><div style="font-size:12px;color:#ffd1df;margin-bottom:8px">Charger cookies depuis téléphone</div><input id="cookieFile" class="file" type="file" accept=".txt"><button id="cookieBtn" class="btn primary" style="width:100%">📤 Uploader cookies.txt</button><div id="cookieInfo" style="font-size:11px;color:var(--muted);margin-top:8px">pas de cookies.txt</div></div></div></article>
 </div></div>
-<div class="footer">DIVINARVIS V8.17 • OLGA SUPERHERO + LOVE PLAYER + RANDOM + LOOP + NO-RELOAD + WATCH FIX</div>
+<div class="footer">DIVINARVIS V17 • AUTO-REFRESH + UTF-8 FIX + WATCH FIX</div>
 </main>
 <script>
 const $=id=>document.getElementById(id);
@@ -108,6 +114,7 @@ function render(){
   });
   trackCount.textContent=tracks.length+' morceau'; trackCount2.textContent=tracks.length+' piste';
 }
+
 function pushSync(action){
   try{
     const now=Date.now(); myLastPush=now;
@@ -116,73 +123,111 @@ function pushSync(action){
     fetch('/api/sync',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}).catch(()=>{});
   }catch{}
 }
+
 window.playIdx=(i)=>{if(!soundUnlocked) unlockSound(); if(i<0||i>=tracks.length) return; current=i; const tr=tracks[i]; isLove=false; isCapital=false; loveBtn.classList.remove('active'); audio.src=tr.url; audio.load(); audio.play().catch(()=>{}); playBtn.textContent='⏸️'; titleEl.textContent=tr.name; metaEl.textContent=`Playlist ${i+1}/${tracks.length}`; render(); pushSync('playIdx');}
 window.playCapital=(url,name)=>{if(!soundUnlocked) unlockSound(); isLove=false; isCapital=true; loveBtn.classList.remove('active'); audio.src=url; audio.load(); audio.play().catch(()=>{}); titleEl.textContent=name; metaEl.textContent='UK RADIO'; hint.textContent='ON AIR - '+name; playBtn.textContent='⏸️'; pushSync('capital');}
 window.deleteTrack=async(i)=>{const name=tracks[i]?.name; if(!confirm(`Supprimer "${name}"?`)) return; try{await fetch('/api/delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({file:name})});}catch{} tracks.splice(i,1); if(current===i){audio.pause(); audio.src=''; current=-1;} if(current>i) current--; render(); log('🗑️ Supprimé: '+name); pushSync('delete');};
+
 audio.addEventListener('timeupdate',()=>{if(audio.duration) progress.style.width=(audio.currentTime/audio.duration*100)+'%';});
 audio.addEventListener('ended',()=>{ if(isLoop){audio.currentTime=0; audio.play();} else {nextTrack();} });
 function nextTrack(){ if(!tracks.length) return; if(randomMode){ let nxt=Math.floor(Math.random()*tracks.length); if(tracks.length>1) while(nxt===current) nxt=Math.floor(Math.random()*tracks.length); playIdx(nxt);} else { if(current < tracks.length-1) playIdx(current+1); } }
 function prevTrack(){ if(randomMode){ nextTrack(); return; } if(current>0) playIdx(current-1); }
+
 playBtn.onclick=()=>{if(!soundUnlocked) unlockSound(); if(!audio.src&&tracks.length) playIdx(0); else if(audio.paused){audio.play(); playBtn.textContent='⏸️'; pushSync('resume');} else {audio.pause(); playBtn.textContent='▶️'; pushSync('pause');}};
 prevBtn.onclick=prevTrack; nextBtn.onclick=nextTrack;
 loopBtn.onclick=()=>{ isLoop=!isLoop; audio.loop=isLoop; if(isLoop){loopBtn.classList.add('active'); log('🔁 BOUCLE ON');} else {loopBtn.classList.remove('active'); log('🔁 BOUCLE OFF');} updateLoopRandomLabel(); pushSync('loop');};
 randomBtn.onclick=()=>{ randomMode=!randomMode; if(randomMode){randomBtn.classList.add('active'); randomBtn.textContent='🔀 ALEATOIRE: ON'; log('🔀 ALEATOIRE ON');} else {randomBtn.classList.remove('active'); randomBtn.textContent='🔀 ALEATOIRE: OFF'; log('🔀 ALEATOIRE OFF');} updateLoopRandomLabel(); pushSync('random');};
 function updateLoopRandomLabel(){ loopState.textContent=`LOOP ${isLoop?'ON':'OFF'} • RANDOM ${randomMode?'ON':'OFF'}`; }
 
-// LOVE RADIO COMME AVANT - DANS LE PLAYER
 loveBtn.addEventListener('click',()=>{
   if(!soundUnlocked) unlockSound();
   if(!isLove){
     isLove=true; isCapital=false;
     audio.src='https://loveradio.hostingradio.ru:8000/loveradio_128';
-    audio.load();
-    audio.play().catch(()=>{});
+    audio.load(); audio.play().catch(()=>{});
     loveBtn.classList.add('active');
-    titleEl.textContent='Love Radio 106.6';
-    metaEl.textContent='ON AIR - LOVE RADIO';
-    hint.textContent='♥️ LOVE ON AIR';
-    playBtn.textContent='⏸️';
-    log('♥️ LOVE RADIO ON - DANS PLAYER');
+    titleEl.textContent='Love Radio 106.6'; metaEl.textContent='ON AIR - LOVE RADIO';
+    hint.textContent='♥️ LOVE ON AIR'; playBtn.textContent='⏸️';
+    log('♥️ LOVE RADIO ON');
   } else {
-    isLove=false;
-    audio.pause(); audio.src='';
-    loveBtn.classList.remove('active');
-    hint.textContent='PAUSE';
-    playBtn.textContent='▶️';
+    isLove=false; audio.pause(); audio.src='';
+    loveBtn.classList.remove('active'); hint.textContent='PAUSE'; playBtn.textContent='▶️';
     log('♥️ LOVE OFF');
   }
   pushSync('love');
 });
 
-async function loadFiles(){try{const r=await fetch('/api/files'); const files=await r.json(); const localOnly=tracks.filter(t=>t.local); tracks=[...localOnly, ...files.map(f=>({name:f.name,url:f.url,local:false}))]; render();}catch{}}
-async function addYT(){const url=(ytInput.value||'').trim(); if(!url) return; ytBtn.disabled=true; ytBtn.textContent='...'; ytStatus.textContent='Téléchargement...'; try{const r=await fetch('/api/youtube',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url})}); const j=await r.json(); if(j.ok){ytStatus.textContent='✅ '+j.title; log('✅ YT OK '+j.title); ytInput.value=''; setTimeout(loadFiles,1500);} else {ytStatus.textContent='❌ '+j.error; log('❌ '+j.error);}}catch(e){ytStatus.textContent='❌ Réseau';} ytBtn.disabled=false; ytBtn.textContent='YT+';}
+// CHARGEMENT & AUTO-REFRESH INTELLIGENT
+async function loadFiles(silent=false){
+  try{
+    const r=await fetch('/api/files'); 
+    const files=await r.json(); 
+    const localOnly=tracks.filter(t=>t.local);
+    const newTracks=[...localOnly, ...files.map(f=>({name:f.name,url:f.url,local:false}))];
+    
+    // Met à jour uniquement si la liste change pour éviter de couper la lecture bêtement
+    if(newTracks.length !== tracks.length || JSON.stringify(newTracks.map(t=>t.name)) !== JSON.stringify(tracks.map(t=>t.name))){
+      tracks = newTracks;
+      render();
+      if(!silent) log('🔄 Playlist actualisée');
+    }
+  }catch{}
+}
+
+async function addYT(){
+  const url=(ytInput.value||'').trim(); if(!url) return; 
+  ytBtn.disabled=true; ytBtn.textContent='...'; ytStatus.textContent='Téléchargement en cours...'; 
+  try{
+    const r=await fetch('/api/youtube',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url})}); 
+    const j=await r.json(); 
+    if(j.ok){
+      ytStatus.textContent='✅ '+j.title; 
+      log('✅ YT OK: '+j.title); 
+      ytInput.value=''; 
+      setTimeout(()=>loadFiles(false),1000);
+    } else {
+      ytStatus.textContent='❌ Erreur'; 
+      log('❌ '+j.error);
+    }
+  }catch(e){
+    ytStatus.textContent='❌ Réseau';
+  } 
+  ytBtn.disabled=false; ytBtn.textContent='YT+';
+}
 ytBtn.addEventListener('click',addYT);
+
 fileInput.addEventListener('change', (e)=>{
   if(!soundUnlocked) unlockSound();
   const files=Array.from(e.target.files); if(!files.length) return;
-  log(`📁 ${files.length} fichier(s) local`);
+  log(`📁 ${files.length} fichier(s) local(aux)`);
   files.forEach(f=>{
     let rawName=f.name || `audio_${Date.now()}.m4a`;
-    let cleanName=rawName.trim();
-    if(!cleanName.includes('.')){ const ext=(f.type.split('/')[1]||'m4a').split(';')[0]; cleanName=cleanName+'.'+ext; }
-    let displayName=cleanName; try{displayName=decodeURIComponent(cleanName)}catch{}
-    const url=URL.createObjectURL(f);
-    tracks.push({name:displayName,url:url,local:true});
-    const fd=new FormData(); fd.append('file',f,cleanName);
-    fetch('/api/upload',{method:'POST',body:fd}).then(r=>r.json()).then(j=>{if(j.ok) log(`✅ PC a reçu: ${displayName}`)}).catch(()=>{});
+    const fd=new FormData(); fd.append('file',f,rawName);
+    fetch('/api/upload',{method:'POST',body:fd})
+      .then(r=>r.json())
+      .then(j=>{
+        if(j.ok){
+          log(`✅ Upload OK: ${j.name}`);
+          loadFiles(false);
+        }
+      })
+      .catch(()=>{});
   });
-  render(); if(current===-1) playIdx(0); fileInput.value='';
+  fileInput.value='';
 });
+
 clearBtn.addEventListener('click',async()=>{if(!confirm('Effacer toute la playlist?')) return; try{await fetch('/api/clear',{method:'POST'});}catch{} tracks=[]; render(); audio.pause(); audio.src=''; log('Playlist effacée'); pushSync('clear');});
+
 async function checkCookies(){try{const r=await fetch('/api/cookies/status'); const j=await r.json(); if(j.exists){cookieInfo.textContent=`✅ cookies.txt actif (${j.size} bytes)`; cookieInfo.style.color='#4ade80'; cookieStatus.textContent=`${j.size} bytes ✅`; cookieStatus.style.color='#4ade80';} else {cookieInfo.textContent='❌ pas de cookies.txt • YouTube bloquera'; cookieStatus.textContent='manquant ❌';}}catch{}}
 checkCookies();
+
 cookieBtn.addEventListener('click',async()=>{ const f=cookieFile.files[0]; if(!f){alert('Choisis cookies.txt'); return;} const fd=new FormData(); fd.append('file',f); cookieBtn.textContent='Upload...'; try{const r=await fetch('/api/cookies/upload',{method:'POST',body:fd}); const j=await r.json(); if(j.ok){log('✅ Cookies uploadés '+j.size+' bytes'); checkCookies(); alert('✅ Cookies actifs!');} else {alert('❌ '+j.error);}}catch{alert('Erreur upload')} cookieBtn.textContent='📤 Uploader cookies.txt'; });
 
-// NO-RELOAD SYNC
+// SYNC & AUTO-REFRESH INTERVALLES
 function handleSyncData(d){
   if(!d || !d.ts) return;
   if(d.ts <= lastTs) return;
-  if(Math.abs(d.ts - myLastPush) < 2500 && d.action !== 'watch_next' && d.action !== 'watch_prev' && d.action !== 'watch_toggle' && d.action !== 'watch_random') return;
+  if(Math.abs(d.ts - myLastPush) < 2500 && !d.action.startsWith('watch_')) return;
   lastTs=d.ts; syncStatus.textContent=d.action||'ONLINE';
   if(d.action==='watch_next') nextTrack();
   else if(d.action==='watch_prev') prevTrack();
@@ -191,10 +236,14 @@ function handleSyncData(d){
   else if(d.action==='playIdx' && typeof d.index==='number' && d.index!==current) playIdx(d.index);
 }
 window.addEventListener('storage',(e)=>{ if(e.key==='divinarvis_sync'){ try{ handleSyncData(JSON.parse(e.newValue)); }catch{} }});
+
+// AUTO-REFRESH toutes les 6 secondes pour récupérer les nouveaux morceaux téléchargés en arrière-plan
+setInterval(()=>{ loadFiles(true); }, 6000);
+
 setInterval(async()=>{ try{ let r=await fetch('/api/sync?nocache='+Date.now()); if(r.ok){ const d=await r.json(); if(d.action && d.action.startsWith('watch_')) handleSyncData(d); } }catch{} }, 10000);
 
-loadFiles();
-log('DIVINARVIS V8.17 READY - LOVE PLAYER + NO-RELOAD + WATCH FIX');
+loadFiles(false);
+log('DIVINARVIS V17 READY - AUTO-REFRESH ACTIF');
 </script>
 </body>
 </html>
@@ -206,12 +255,13 @@ def index(): return render_template_string(HTML)
 @app.route("/api/files")
 def api_files():
     files=[]
-    for f in os.listdir(UPLOAD_FOLDER):
-        fp=os.path.join(UPLOAD_FOLDER,f)
-        if os.path.isfile(fp):
-            ext=os.path.splitext(f)[1].lower()
-            if ext in ALLOWED:
-                files.append({"name":f,"url":f"/static/uploads/{f}"})
+    if os.path.exists(UPLOAD_FOLDER):
+        for f in os.listdir(UPLOAD_FOLDER):
+            fp=os.path.join(UPLOAD_FOLDER,f)
+            if os.path.isfile(fp):
+                ext=os.path.splitext(f)[1].lower()
+                if ext in ALLOWED:
+                    files.append({"name":f,"url":f"/static/uploads/{f}"})
     files.sort(key=lambda x: os.path.getmtime(os.path.join(UPLOAD_FOLDER,x["name"])), reverse=True)
     return jsonify(files)
 
@@ -220,7 +270,7 @@ def api_upload():
     if "file" not in request.files: return jsonify({"ok":False}),400
     file=request.files["file"]
     if not file.filename: return jsonify({"ok":False}),400
-    filename=secure_filename(file.filename) or f"audio_{int(time.time())}.m4a"
+    filename = clean_filename(file.filename) or f"audio_{int(time.time())}.m4a"
     file.save(os.path.join(UPLOAD_FOLDER, filename))
     return jsonify({"ok":True,"name":filename})
 
@@ -228,7 +278,7 @@ def api_upload():
 def api_delete():
     data=request.get_json() or {}
     name=data.get("file","")
-    for p in [os.path.join(UPLOAD_FOLDER,secure_filename(name)), os.path.join(UPLOAD_FOLDER,name)]:
+    for p in [os.path.join(UPLOAD_FOLDER, clean_filename(name)), os.path.join(UPLOAD_FOLDER, name)]:
         if os.path.exists(p):
             try: os.remove(p)
             except: pass
@@ -269,7 +319,7 @@ def api_youtube():
         if r.returncode!=0:
             err=r.stderr[-800:]
             return jsonify({"ok":False,"error":err}),400
-        return jsonify({"ok":True,"title":"OK"})
+        return jsonify({"ok":True,"title":"Téléchargé avec succès"})
     except Exception as e:
         return jsonify({"ok":False,"error":str(e)}),500
 
