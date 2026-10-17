@@ -39,12 +39,12 @@ button,input{font:inherit}button{cursor:pointer}
 <body>
 <div id="soundGate"><div class="gateCard"><div style="font-size:48px">🔊</div><h2>DIVINARVIS V8.17</h2><div style="color:var(--muted);font-size:13px">OLGA MUSE • RANDOM • UTF-8 FIX</div><button type="button" class="gateBtn" id="gateBtn">▶️ ACTIVER LE SON</button></div></div>
 <main class="shell">
-<header class="topbar"><div class="brand"><div class="logo">D</div><div><h1>DIVINARVIS</h1><small>V8.17 • OLGA PROFILE FIXED</small></div></div><div class="onlineBox"><i class="dot ok"></i><div><strong id="syncStatus">ONLINE</strong></div></div></header>
+<header class="topbar"><div class="brand"><div class="logo">D</div><div><h1>DIVINARVIS</h1><small>V8.17 • OLGA JPEG FIXED</small></div></div><div class="onlineBox"><i class="dot ok"></i><div><strong id="syncStatus">ONLINE</strong></div></div></header>
 <div class="grid">
 <div>
 <article class="card profile">
   <div class="portraitWrap">
-    <img class="portrait" src="/static/olga.jpg" onerror="this.src='/static/olga.png'" alt="OLGA">
+    <img class="portrait" src="/static/olga.jpeg" onerror="this.src='/static/olga.jpg'; this.onerror=function(){this.src='/static/olga.png'}" alt="OLGA">
   </div>
   <h3>OLGA</h3>
   <div class="tag">DIVINARVIS MUSE</div>
@@ -55,7 +55,7 @@ button,input{font:inherit}button{cursor:pointer}
 <div>
 <article class="card"><div class="cardHeader"><h2>Media Control</h2><small id="liveHint" style="color:var(--muted)">SON BLOQUÉ</small></div><div class="player">
 <div class="now">
-  <img id="cover" class="cover" src="/static/olga.jpg" onerror="this.src='/static/olga.png'">
+  <img id="cover" class="cover" src="/static/olga.jpeg" onerror="this.src='/static/olga.jpg'; this.onerror=function(){this.src='/static/olga.png'}">
   <div><div class="nowTitle" id="title">Son bloqué</div><div class="nowMeta" id="meta">Clique pour activer.</div></div>
 </div>
 <audio id="audio" playsinline preload="metadata" crossorigin="anonymous"></audio>
@@ -98,7 +98,7 @@ button,input{font:inherit}button{cursor:pointer}
 </div></article>
 </div>
 </div>
-<div class="footer">DIVINARVIS V8.17 • OLGA FIXED + RANDOM</div>
+<div class="footer">DIVINARVIS V8.17 • OLGA JPEG FIXED + RANDOM</div>
 </main>
 <script>
 const $=id=>document.getElementById(id);
