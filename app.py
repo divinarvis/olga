@@ -25,6 +25,14 @@ sync_lock = threading.Lock()
 sync_enabled = False
 last_sync = {"ts": 0, "action": "idle", "sourceId": ""}
 
+# Facultatif mais recommandé sur Render.
+# Ajoute SIRI_TOKEN dans Environment, puis le même token dans l'en-tête
+# X-Divinarvis-Token du raccourci Apple.
+SIRI_TOKEN = os.environ.get("SIRI_TOKEN", "").strip()
+
+CAPITAL_URL = "https://media-ice.musicradio.com/CapitalUKMP3"
+CAPITAL_XTRA_URL = "https://media-ice.musicradio.com/CapitalXTRANationalMP3"
+
 
 def clean_filename(filename: str, fallback_ext: str = "") -> str:
     """Conserve les accents tout en retirant les caractères dangereux/interdits."""
@@ -37,7 +45,6 @@ def clean_filename(filename: str, fallback_ext: str = "") -> str:
     stem, ext = os.path.splitext(raw)
     ext = ext.lower() or fallback_ext
     stem = stem.strip(" .") or f"fichier_{int(time.time())}"
-    # Limite raisonnable tout en conservant les caractères Unicode.
     return f"{stem[:180]}{ext}"
 
 
@@ -79,9 +86,87 @@ def public_file(name: str) -> dict:
     }
 
 
+def normalize_voice_command(value: str) -> str:
+    """Normalise une phrase Siri : minuscules, espaces et accents neutralisés."""
+    text = unicodedata.normalize("NFD", str(value or "").strip().lower())
+    text = "".join(ch for ch in text if unicodedata.category(ch) != "Mn")
+    return re.sub(r"\s+", " ", text).strip()
+
+
+def siri_authorized() -> bool:
+    """Si SIRI_TOKEN existe, exige sa présence dans l'en-tête ou le JSON."""
+    if not SIRI_TOKEN:
+        return True
+    supplied = request.headers.get("X-Divinarvis-Token", "").strip()
+    if not supplied:
+        data = request.get_json(silent=True) or {}
+        supplied = str(data.get("token") or "").strip()
+    return supplied == SIRI_TOKEN
+
+
+def publish_remote_command(payload: dict) -> dict:
+    """Publie une commande que les clients DIVINARVIS récupéreront via /api/sync."""
+    global last_sync
+    command = dict(payload)
+    command["sourceId"] = "siri"
+    command["ts"] = int(time.time() * 1000)
+    with sync_lock:
+        last_sync = command
+    return command
+
+
+SIRI_COMMANDS = {
+    "capital": {
+        "action": "capital",
+        "capitalUrl": CAPITAL_URL,
+        "capitalName": "Capital",
+        "currentRadioId": "capital",
+        "currentTime": 0,
+    },
+    "xtra": {
+        "action": "capital",
+        "capitalUrl": CAPITAL_XTRA_URL,
+        "capitalName": "Capital XTRA",
+        "currentRadioId": "xtra",
+        "currentTime": 0,
+    },
+    "capital xtra": {
+        "action": "capital",
+        "capitalUrl": CAPITAL_XTRA_URL,
+        "capitalName": "Capital XTRA",
+        "currentRadioId": "xtra",
+        "currentTime": 0,
+    },
+    "pause": {"action": "pause"},
+    "stop": {"action": "pause"},
+    "reprendre": {"action": "resume"},
+    "lecture": {"action": "resume"},
+    "play": {"action": "resume"},
+    "suivant": {"action": "next"},
+    "prochain": {"action": "next"},
+    "precedent": {"action": "previous"},
+    "retour": {"action": "previous"},
+    "boucle": {"action": "toggleLoop"},
+    "aleatoire": {"action": "toggleRandom"},
+    "synchronisation": {"action": "enableSync"},
+    "sync": {"action": "enableSync"},
+}
+
+
 @app.route("/")
 def index():
     return render_template("index.html")
+
+
+@app.get("/api/health")
+def health():
+    return jsonify(
+        ok=True,
+        service="DIVINARVIS Media Player",
+        siri=True,
+        siriProtected=bool(SIRI_TOKEN),
+        timestamp=int(time.time() * 1000),
+    )
 
 
 @app.get("/api/files")
@@ -199,11 +284,13 @@ def youtube_download():
             timeout=240,
         )
         if result.returncode != 0:
-            return jsonify(ok=False, error=(result.stderr or "Téléchargement échoué")[-1600:]), 400
+            return jsonify(
+                ok=False,
+                error=(result.stderr or "Téléchargement échoué")[-1600:],
+            ), 400
 
         after = {p.name for p in UPLOAD_DIR.iterdir() if p.is_file()}
         created = sorted(after - before)
-        # Si yt-dlp a réutilisé un fichier, récupère aussi son chemin imprimé.
         printed = [line.strip() for line in result.stdout.splitlines() if line.strip()]
         if not created and printed:
             candidate = Path(printed[-1]).name
@@ -222,6 +309,65 @@ def youtube_download():
     except Exception as exc:
         app.logger.exception("Erreur YouTube")
         return jsonify(ok=False, error=str(exc)), 500
+
+
+@app.post("/api/siri")
+def siri_command():
+    """Reçoit une commande vocale transmise par Raccourcis/Siri."""
+    global sync_enabled
+
+    if not siri_authorized():
+        return jsonify(ok=False, error="Accès Siri refusé"), 401
+
+    data = request.get_json(silent=True) or {}
+    spoken = str(data.get("command") or data.get("text") or "").strip()
+    normalized = normalize_voice_command(spoken)
+
+    if not normalized:
+        return jsonify(ok=False, error="Commande vide"), 400
+
+    payload = SIRI_COMMANDS.get(normalized)
+    if payload is None:
+        return jsonify(
+            ok=False,
+            error="Commande inconnue",
+            heard=spoken,
+            supported=[
+                "capital",
+                "capital xtra",
+                "pause",
+                "reprendre",
+                "suivant",
+                "précédent",
+                "boucle",
+                "aléatoire",
+                "synchronisation",
+            ],
+        ), 400
+
+    if payload["action"] == "enableSync":
+        with sync_lock:
+            sync_enabled = True
+        published = publish_remote_command({"action": "syncState", "enabled": True})
+        return jsonify(
+            ok=True,
+            heard=spoken,
+            message="Synchronisation DIVINARVIS activée",
+            command=published,
+        )
+
+    # Siri sert de télécommande : on active la réception des commandes.
+    with sync_lock:
+        sync_enabled = True
+
+    published = publish_remote_command(payload)
+    return jsonify(
+        ok=True,
+        heard=spoken,
+        normalized=normalized,
+        message=f"Commande DIVINARVIS reçue : {spoken}",
+        command=published,
+    )
 
 
 @app.route("/api/sync", methods=["GET", "POST"])
