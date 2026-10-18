@@ -197,6 +197,46 @@ input:focus{border-color:#e33a98;box-shadow:0 0 0 1px #ffc5e4}
   .love-radio-icon { width:16px; height:16px; flex:0 0 16px; }
 }
 </style>
+
+<style id="mobile-responsive-fix">
+@media (max-width:700px){
+  html,body{min-width:0;overflow-x:hidden}
+  body{padding:0 0 44px}
+  .window{width:100%;min-height:calc(100vh - 44px);border-left:0;border-right:0;border-radius:0;display:block}
+  .titlebar{min-height:42px}
+  .app-title{font-size:12px;line-height:1.15;padding:4px 7px;gap:6px}
+  .app-title span{max-width:190px;white-space:normal}
+  .window-actions{padding:4px 3px;gap:2px}
+  .win-btn{width:27px!important;height:27px!important}
+  .shell{display:block;min-height:0}
+  .sidebar{width:100%;height:auto;min-height:0;padding:4px 3px;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:3px;border-right:0;border-bottom:1px solid #c895bd}
+  .nav-btn{width:100%;min-height:52px;padding:4px 2px;display:flex;flex-direction:column;justify-content:center;gap:1px;text-align:center;font-size:10px;line-height:1.1;white-space:normal}
+  .nav-btn span{font-size:18px;line-height:1.1}
+  .sidebar-spacer{display:none}
+  .side-caption{grid-column:1/-1;margin:0;padding:4px 6px;border-top:0;text-align:center;font-size:10px}
+  .content{width:100%;padding:10px 8px 16px;overflow:visible}
+  .grid{grid-template-columns:minmax(0,1fr);gap:10px}
+  .stack{gap:10px}
+  .card{padding:11px}
+  .player{grid-template-columns:72px minmax(0,1fr);gap:10px}
+  .cover{width:72px;height:72px}
+  .track-title{font-size:19px}
+  .quick-grid{grid-template-columns:1fr;gap:7px}
+  .radio-buttons{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+  .track-row{grid-template-columns:18px minmax(0,1fr) auto;gap:4px}
+  .track-row .danger{grid-column:2;justify-self:start}
+  .xp-taskbar{height:40px}
+  .xp-start{min-width:92px;height:40px;font-size:13px;padding-left:8px;padding-right:9px}
+  .xp-task-app{min-width:0;max-width:45%;margin-left:4px;padding:3px 6px;font-size:10px;white-space:normal;line-height:1.05}
+  .xp-tray{gap:4px;padding:0 5px;font-size:9px}
+}
+@media (max-width:380px){
+  .sidebar{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .nav-btn{font-size:9px}
+  .app-title span{max-width:145px}
+  .track-title{font-size:17px}
+}
+</style>
 </head>
 <body>
 <div class="window">
