@@ -1,8 +1,8 @@
 "use strict";
 
-/* DIVINARVIS V10 - Correctif final radios
-   - Capital & Capital XTRA : flux audio directs internes
-   - Love Radio : redirige vers www.loveradio.ru dans un nouvel onglet
+/* DIVINARVIS V10 - Correctif final flux radios directs
+   - Capital & Capital XTRA : flux audio directs internes (HTTPS)
+   - Love Radio : ouverture de www.loveradio.ru dans un onglet externe
 */
 (() => {
   const get = id => document.getElementById(id);
@@ -17,18 +17,21 @@
   const radioState = get("radioState");
   const statusTrack = get("statusTrack");
 
-  let activeRadio = null; // "capital", "xtra"
+  let activeRadio = null; // "capital" ou "xtra"
   let loveTab = null;
 
-  // Flux audio directs vérifiés (HTTPS)
+  // Flux directs officiels Global Radio (HTTPS)
   const CAPITAL_STREAMS = [
     "https://media-ssl.musicradio.com/Capital",
     "https://media-ice.musicradio.com/CapitalUKMP3"
   ];
+  
   const XTRA_STREAMS = [
     "https://media-ssl.musicradio.com/CapitalXTRA",
-    "https://media-ice.musicradio.com/CapitalXTRAUKMP3"
+    "https://media-ice.musicradio.com/CapitalXTRAUKMP3",
+    "https://icecast.thisisdax.com/CapitalXTRAMP3"
   ];
+
   const LOVE_URL = "https://www.loveradio.ru/";
 
   const setState = message => {
