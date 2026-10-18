@@ -26,7 +26,7 @@
     "https://media-ice.musicradio.com/CapitalUKMP3",
     "https://media-ssl.musicradio.com/Capital"
   ];
-  const XTRA_PLAYER = "https://play.radioplayer.org/en/live/ODI2fjEyNjg";
+  const XTRA_PLAYER = "https://media-ice.musicradio.com/CapitalXTRANationalMP3";
   const LOVE_PLAYER = "https://www.loveradio.ru/";
 
   // L'ancienne fenetre Love Radio n'est plus utilisee.
