@@ -27,7 +27,7 @@
     "https://media-ssl.musicradio.com/Capital"
   ];
   const XTRA_PLAYER = "https://play.radioplayer.org/en/live/ODI2fjEyNjg";
-  const LOVE_PLAYER = "https://player.loveradio.ru/";
+  const LOVE_PLAYER = "https://www.loveradio.ru/";
 
   // L'ancienne fenetre Love Radio n'est plus utilisee.
   const oldLoveWindow = get("loveRadioWindow");
