@@ -100,7 +100,7 @@
       if (title) title.textContent = "Capital";
       if (meta) meta.textContent = "Radio en direct";
       if (liveHint) liveHint.textContent = "Flux Capital";
-      state("Connexion Ã  Capital¦");
+      state("Connexion à Capital London");
       status("Capital");
 
       try {
