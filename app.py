@@ -404,4 +404,6 @@ def too_large(_error):
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", "5000")))
+    # Récupère le port injecté par Railway ou Render, sinon utilise 5000 par défaut
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
