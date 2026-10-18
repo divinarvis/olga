@@ -1,124 +1,210 @@
-import os, time, subprocess, re
-from flask import Flask, request, jsonify, send_from_directory, render_template
+import os
+import time
+import threading
+import subprocess
+from flask import Flask, request, jsonify, render_template
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
-BASE = os.path.dirname(os.path.abspath(__file__))
-UPLOAD_FOLDER = os.path.join(BASE, "static", "uploads")
-STATIC_FOLDER = os.path.join(BASE, "static")
-COOKIES_FILE = os.path.join(BASE, "cookies.txt")
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-os.makedirs(STATIC_FOLDER, exist_ok=True)
 
-ALLOWED = {".mp3",".m4a",".wav",".aac",".mp4",".ogg",".flac",".jpg",".jpeg",".png",".webp"}
-last_sync = {"ts": 0, "action": "idle"}
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+STATIC_DIR = os.path.join(BASE_DIR, "static")
+UPLOAD_DIR = os.path.join(STATIC_DIR, "uploads")
+COOKIES_FILE = os.path.join(BASE_DIR, "cookies.txt")
 
-def clean_filename(name):
-    name = os.path.basename(name)
-    # Ne nettoie que les caractères interdits par les systèmes de fichiers (/ \ : * ? " < > |)
-    # Conserve TOUS les emojis, les espaces, les accents et le cyrillique
-    name = re.sub(r'[/\\:\*\?"<>\|]', '_', name)
-    return name.strip()
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+ALLOWED = {".mp3", ".m4a", ".wav", ".aac", ".mp4", ".ogg", ".flac"}
+
+sync_lock = threading.Lock()
+sync_enabled = False
+last_sync = {"ts": 0, "action": "idle", "sourceId": ""}
+
 
 @app.route("/")
 def index():
     return render_template("index.html")
 
-@app.route("/api/files")
-def api_files():
+
+@app.get("/api/files")
+def list_files():
     files = []
-    if os.path.exists(UPLOAD_FOLDER):
-        for f in os.listdir(UPLOAD_FOLDER):
-            fp = os.path.join(UPLOAD_FOLDER, f)
-            if os.path.isfile(fp):
-                ext = os.path.splitext(f)[1].lower()
-                if ext in ALLOWED:
-                    files.append({"name": f, "url": f"/static/uploads/{f}"})
-    files.sort(key=lambda x: os.path.getmtime(os.path.join(UPLOAD_FOLDER, x["name"])), reverse=True)
+
+    for name in os.listdir(UPLOAD_DIR):
+        path = os.path.join(UPLOAD_DIR, name)
+        if os.path.isfile(path) and os.path.splitext(name)[1].lower() in ALLOWED:
+            files.append({
+                "name": name,
+                "url": f"/static/uploads/{name}",
+                "modified": os.path.getmtime(path)
+            })
+
+    files.sort(key=lambda item: item["modified"], reverse=True)
     return jsonify(files)
 
-@app.route("/api/upload", methods=["POST"])
-def api_upload():
-    if "file" not in request.files:
-        return jsonify({"ok": False}), 400
-    file = request.files["file"]
-    if not file.filename:
-        return jsonify({"ok": False}), 400
+
+@app.post("/api/upload")
+def upload_file():
+    file = request.files.get("file")
+
+    if not file or not file.filename:
+        return jsonify(ok=False, error="Aucun fichier reçu"), 400
+
     ext = os.path.splitext(file.filename)[1].lower()
     if ext not in ALLOWED:
-        return jsonify({"ok": False, "error": "Format non autorisé"}), 400
-    filename = clean_filename(file.filename) or f"audio_{int(time.time())}.m4a"
-    file.save(os.path.join(UPLOAD_FOLDER, filename))
-    return jsonify({"ok": True, "file": filename})
+        return jsonify(ok=False, error="Format audio non autorisé"), 400
 
-@app.route("/api/delete", methods=["POST"])
-def api_delete():
-    data = request.get_json() or {}
-    name = data.get("file", "")
+    name = secure_filename(os.path.basename(file.filename))
     if not name:
-        return jsonify({"ok": False}), 400
-    for p in [os.path.join(UPLOAD_FOLDER, clean_filename(name)), os.path.join(UPLOAD_FOLDER, name)]:
-        if os.path.exists(p) and os.path.commonpath([p, UPLOAD_FOLDER]) == UPLOAD_FOLDER:
-            try: os.remove(p)
-            except: pass
-    return jsonify({"ok": True})
+        name = f"audio_{int(time.time())}{ext}"
 
-@app.route("/api/cookies/status")
-def cookies_status():
-    if os.path.exists(COOKIES_FILE):
-        return jsonify({"exists": True, "size": os.path.getsize(COOKIES_FILE)})
-    return jsonify({"exists": False, "size": 0})
+    stem, suffix = os.path.splitext(name)
+    destination = os.path.join(UPLOAD_DIR, name)
+    number = 2
 
-@app.route("/api/cookies/upload", methods=["POST"])
-def cookies_upload():
-    if "file" not in request.files:
-        return jsonify({"ok": False, "error": "Aucun fichier"}), 400
-    file = request.files["file"]
-    data = file.read().decode('utf-8', errors='ignore')
-    with open(COOKIES_FILE, "w", encoding="utf-8") as out:
-        out.write(data)
-    return jsonify({"ok": True, "size": len(data)})
+    while os.path.exists(destination):
+        name = f"{stem}_{number}{suffix}"
+        destination = os.path.join(UPLOAD_DIR, name)
+        number += 1
 
-@app.route("/api/youtube", methods=["POST"])
-def api_youtube():
-    data = request.get_json() or {}
-    url = data.get("url", "").strip()
-    if not url or not (url.startswith("http://") or url.startswith("https://")):
-        return jsonify({"ok": False, "error": "URL invalide"}), 400
-    out = os.path.join(UPLOAD_FOLDER, "%(title)s.%(ext)s")
-    cmd = ["yt-dlp", "--no-playlist", "-x", "--audio-format", "mp3", "--audio-quality", "0", "-o", out, url]
-    if os.path.exists(COOKIES_FILE):
-        cmd[1:1] = ["--cookies", COOKIES_FILE]
-    else:
-        cmd[1:1] = ["--user-agent", "Mozilla/5.0"]
+    file.save(destination)
+    return jsonify(ok=True, file=name, url=f"/static/uploads/{name}")
+
+
+@app.post("/api/delete")
+def delete_file():
+    data = request.get_json(silent=True) or {}
+    name = secure_filename(os.path.basename(data.get("file", "")))
+
+    if not name:
+        return jsonify(ok=False, error="Nom de fichier manquant"), 400
+
+    path = os.path.abspath(os.path.join(UPLOAD_DIR, name))
+    root = os.path.abspath(UPLOAD_DIR)
+
+    if os.path.commonpath([path, root]) != root:
+        return jsonify(ok=False, error="Chemin invalide"), 400
+
     try:
-        r = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
-        if r.returncode != 0:
-            err = r.stderr[-800:]
-            return jsonify({"ok": False, "error": err}), 400
-        return jsonify({"ok": True, "title": "Téléchargé avec succès"})
-    except Exception as e:
-        return jsonify({"ok": False, "error": str(e)}), 500
+        if os.path.isfile(path):
+            os.remove(path)
+        return jsonify(ok=True)
+    except OSError as exc:
+        return jsonify(ok=False, error=str(exc)), 500
+
+
+@app.get("/api/cookies/status")
+def cookie_status():
+    exists = os.path.isfile(COOKIES_FILE)
+    return jsonify(
+        exists=exists,
+        size=os.path.getsize(COOKIES_FILE) if exists else 0
+    )
+
+
+@app.post("/api/cookies/upload")
+def cookie_upload():
+    file = request.files.get("file")
+    if not file or not file.filename:
+        return jsonify(ok=False, error="Aucun fichier reçu"), 400
+
+    content = file.read(2_000_000).decode("utf-8", errors="ignore")
+    with open(COOKIES_FILE, "w", encoding="utf-8") as output:
+        output.write(content)
+
+    return jsonify(ok=True, size=len(content))
+
+
+@app.post("/api/cookies/delete")
+def cookie_delete():
+    try:
+        if os.path.isfile(COOKIES_FILE):
+            os.remove(COOKIES_FILE)
+        return jsonify(ok=True)
+    except OSError as exc:
+        return jsonify(ok=False, error=str(exc)), 500
+
+
+@app.post("/api/youtube")
+def youtube_download():
+    data = request.get_json(silent=True) or {}
+    url = (data.get("url") or "").strip()
+
+    if not url.startswith(("https://", "http://")):
+        return jsonify(ok=False, error="URL invalide"), 400
+
+    output = os.path.join(UPLOAD_DIR, "%(title).150s.%(ext)s")
+    command = [
+        "yt-dlp", "--no-playlist", "-x",
+        "--audio-format", "mp3", "--audio-quality", "0",
+        "-o", output
+    ]
+
+    if os.path.isfile(COOKIES_FILE):
+        command.extend(["--cookies", COOKIES_FILE])
+
+    command.append(url)
+
+    try:
+        result = subprocess.run(
+            command, capture_output=True, text=True, timeout=180
+        )
+
+        if result.returncode != 0:
+            return jsonify(
+                ok=False,
+                error=(result.stderr or "Téléchargement échoué")[-1200:]
+            ), 400
+
+        return jsonify(ok=True, title="Téléchargement terminé")
+
+    except FileNotFoundError:
+        return jsonify(
+            ok=False, error="yt-dlp n'est pas installé sur le serveur."
+        ), 501
+    except subprocess.TimeoutExpired:
+        return jsonify(ok=False, error="Délai de téléchargement dépassé"), 504
+    except Exception as exc:
+        app.logger.exception("Erreur YouTube")
+        return jsonify(ok=False, error=str(exc)), 500
+
 
 @app.route("/api/sync", methods=["GET", "POST"])
-def api_sync():
-    global last_sync
-    if request.method == "POST":
-        try:
-            d = request.get_json()
-            if d:
-                last_sync = d
-                last_sync["ts"] = time.time() * 1000
-        except: pass
-        return jsonify({"ok": True})
-    return jsonify(last_sync)
+def sync():
+    global sync_enabled, last_sync
 
-@app.route("/static/<path:filename>")
-def serve_static(filename):
-    return send_from_directory(STATIC_FOLDER, filename)
+    if request.method == "GET":
+        with sync_lock:
+            return jsonify({
+                "enabled": sync_enabled,
+                "command": dict(last_sync)
+            })
 
-@app.route("/static/uploads/<path:filename>")
-def serve_upload(filename):
-    return send_from_directory(UPLOAD_FOLDER, filename)
+    data = request.get_json(silent=True) or {}
+    action = data.get("action", "")
+
+    with sync_lock:
+        if action == "toggleSync":
+            sync_enabled = bool(data.get("enabled", False))
+            last_sync = {
+                "action": "syncState",
+                "enabled": sync_enabled,
+                "sourceId": str(data.get("sourceId", "")),
+                "ts": int(time.time() * 1000)
+            }
+            return jsonify(ok=True, enabled=sync_enabled, command=last_sync)
+
+        if not sync_enabled:
+            return jsonify(ok=True, ignored=True, enabled=False)
+
+        last_sync = dict(data)
+        last_sync["ts"] = int(time.time() * 1000)
+
+        return jsonify(ok=True, enabled=True, command=last_sync)
+
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 10000)))
+    app.run(
+        host="0.0.0.0",
+        port=int(os.environ.get("PORT", "10000"))
+    )
