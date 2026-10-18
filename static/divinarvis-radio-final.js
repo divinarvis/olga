@@ -1,9 +1,8 @@
 "use strict";
 
-/* DIVINARVIS V10 - Correctif final radios
-   - Capital : lecture/arret dans le lecteur principal
-   - Capital XTRA : ouverture/fermeture du lecteur web dans un onglet
-   - Love Radio Russie : ouverture/fermeture du lecteur officiel dans un onglet
+/* DIVINARVIS V10 - Correctif final radios intégré
+   - Capital & Capital XTRA : lecture directe dans le lecteur interne
+   - Love Radio Russie : ouverture/fermeture du lecteur officiel dans un onglet externe
 */
 (() => {
   const get = id => document.getElementById(id);
@@ -18,18 +17,19 @@
   const radioState = get("radioState");
   const statusTrack = get("statusTrack");
 
-  let capitalActive = false;
-  let xtraTab = null;
+  let activeRadio = null; // "capital", "xtra" ou null
   let loveTab = null;
 
   const CAPITAL_STREAMS = [
     "https://media-ice.musicradio.com/CapitalUKMP3",
     "https://media-ssl.musicradio.com/Capital"
   ];
-  const XTRA_PLAYER = "https://media-ice.musicradio.com/CapitalXTRANationalMP3";
-  const LOVE_PLAYER = "https://www.loveradio.ru/";
+  const XTRA_STREAMS = [
+    "https://media-ice.musicradio.com/CapitalXTRAUKMP3",
+    "https://media-ssl.musicradio.com/CapitalXTRA"
+  ];
+  const LOVE_PLAYER = "https://player.loveradio.ru/";
 
-  // L'ancienne fenetre Love Radio n'est plus utilisee.
   const oldLoveWindow = get("loveRadioWindow");
   if (oldLoveWindow) oldLoveWindow.remove();
 
@@ -48,60 +48,59 @@
   };
 
   const updateButtons = () => {
-    markButton(capitalButton, capitalActive && !audio.paused);
-    markButton(xtraButton, Boolean(xtraTab && !xtraTab.closed));
+    const isPlaying = !audio.paused;
+    markButton(capitalButton, activeRadio === "capital" && isPlaying);
+    markButton(xtraButton, activeRadio === "xtra" && isPlaying);
     markButton(loveButton, Boolean(loveTab && !loveTab.closed));
 
     if (capitalButton) {
-      capitalButton.textContent = capitalActive && !audio.paused
-        ? "■ Capital"
-        : "▶ Capital";
+      capitalButton.textContent = (activeRadio === "capital" && isPlaying) ? "■ Capital" : "▶ Capital";
     }
     if (xtraButton) {
-      xtraButton.textContent = xtraTab && !xtraTab.closed
-        ? "■ Capital XTRA"
-        : "▶ Capital XTRA";
+      xtraButton.textContent = (activeRadio === "xtra" && isPlaying) ? "■ XTRA" : "▶ XTRA";
     }
   };
 
-  const stopCapital = () => {
-    if (!capitalActive) return;
+  const stopRadio = () => {
+    if (!activeRadio) return;
     audio.pause();
     audio.removeAttribute("src");
     audio.load();
-    capitalActive = false;
-    setState("Capital arretee");
-    setStatusTrack("Aucun media");
+    const oldName = activeRadio === "capital" ? "Capital" : "Capital XTRA";
+    activeRadio = null;
+    setState(`${oldName} arrêtée`);
+    setStatusTrack("Aucun média");
     updateButtons();
   };
 
-  const startCapital = async () => {
-    if (typeof window.closeLoveRadio === "function") {
-      try { window.closeLoveRadio(); } catch (_) {}
+  const startRadioStream = async (name, streams) => {
+    if (activeRadio) {
+      audio.pause();
+      audio.removeAttribute("src");
     }
 
-    capitalActive = true;
+    activeRadio = (name === "Capital") ? "capital" : "xtra";
     let position = 0;
 
     const attempt = async () => {
-      if (!capitalActive) return;
-      if (position >= CAPITAL_STREAMS.length) {
-        capitalActive = false;
-        setState("Capital indisponible");
+      if (!activeRadio) return;
+      if (position >= streams.length) {
+        activeRadio = null;
+        setState(`${name} indisponible`);
         updateButtons();
         return;
       }
 
-      audio.src = CAPITAL_STREAMS[position++];
-      if (get("title")) get("title").textContent = "Capital";
+      audio.src = streams[position++];
+      if (get("title")) get("title").textContent = name;
       if (get("meta")) get("meta").textContent = "Radio en direct";
       if (get("liveHint")) get("liveHint").textContent = "Flux radio";
-      setState("Connexion a Capital...");
-      setStatusTrack("Capital");
+      setState(`Connexion à ${name}...`);
+      setStatusTrack(name);
 
       try {
         await audio.play();
-        setState("En direct : Capital - appuie de nouveau pour arreter");
+        setState(`En direct : ${name} - appuie de nouveau pour arrêter`);
         updateButtons();
       } catch (_) {
         setTimeout(attempt, 450);
@@ -111,46 +110,43 @@
     await attempt();
   };
 
-  const toggleCapital = () => {
-    if (capitalActive && !audio.paused) stopCapital();
-    else startCapital();
+  const toggleInternalRadio = (name) => {
+    const targetKey = (name === "Capital") ? "capital" : "xtra";
+    if (activeRadio === targetKey && !audio.paused) {
+      stopRadio();
+    } else {
+      const streams = (name === "Capital") ? CAPITAL_STREAMS : XTRA_STREAMS;
+      startRadioStream(name, streams);
+    }
   };
 
-  const toggleExternalRadio = (kind) => {
-    const isXtra = kind === "xtra";
-    let tab = isXtra ? xtraTab : loveTab;
-    const name = isXtra ? "Capital XTRA" : "Love Radio Russie";
-    const url = isXtra ? XTRA_PLAYER : LOVE_PLAYER;
-    const target = isXtra ? "divinarvisCapitalXtra" : "divinarvisLoveRadio";
-
-    if (tab && !tab.closed) {
-      tab.close();
-      if (isXtra) xtraTab = null;
-      else loveTab = null;
-      setState(`${name} fermee`);
+  const toggleLoveRadio = () => {
+    if (loveTab && !loveTab.closed) {
+      loveTab.close();
+      loveTab = null;
+      setState("Love Radio fermée");
       updateButtons();
       return;
     }
 
-    stopCapital();
-    tab = window.open(url, target);
-    if (isXtra) xtraTab = tab;
-    else loveTab = tab;
-
-    if (tab) {
-      setState(`${name} ouverte dans un nouvel onglet - appuie de nouveau pour fermer`);
-      setStatusTrack(name);
+    stopRadio();
+    loveTab = window.open(LOVE_PLAYER, "divinarvisLoveRadio");
+    if (loveTab) {
+      setState("Love Radio ouverte dans un nouvel onglet");
+      setStatusTrack("Love Radio Russie");
     } else {
-      setState(`Le navigateur a bloque l'onglet ${name}`);
+      setState("Le navigateur a bloqué l'onglet Love Radio");
     }
     updateButtons();
   };
 
-  if (capitalButton) capitalButton.onclick = toggleCapital;
-  if (capitalQuick) capitalQuick.onclick = toggleCapital;
-  if (xtraButton) xtraButton.onclick = () => toggleExternalRadio("xtra");
-  if (xtraQuick) xtraQuick.onclick = () => toggleExternalRadio("xtra");
-  if (loveButton) loveButton.onclick = () => toggleExternalRadio("love");
+  if (capitalButton) capitalButton.onclick = () => toggleInternalRadio("Capital");
+  if (capitalQuick) capitalQuick.onclick = () => toggleInternalRadio("Capital");
+  
+  if (xtraButton) xtraButton.onclick = () => toggleInternalRadio("Capital XTRA");
+  if (xtraQuick) xtraQuick.onclick = () => toggleInternalRadio("Capital XTRA");
+  
+  if (loveButton) loveButton.onclick = toggleLoveRadio;
 
   audio.addEventListener("pause", updateButtons);
   audio.addEventListener("play", updateButtons);
