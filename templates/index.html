@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#202020">
+<title>DIVINARVIS Media Player</title>
+<style>
+:root{
+  color-scheme:dark;
+  --bg:#202020;--mica:rgba(36,36,36,.86);--mica2:rgba(45,45,45,.76);
+  --surface:#2b2b2b;--surface2:#323232;--line:rgba(255,255,255,.09);
+  --line2:rgba(255,255,255,.16);--text:#f5f5f5;--muted:#aaa;
+  --accent:#60cdff;--accent2:#0078d4;--danger:#ff99a4;--success:#6ccb5f;
+  --shadow:0 18px 48px rgba(0,0,0,.38);--radius:9px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font:14px/1.45 "Segoe UI Variable","Segoe UI",sans-serif;color:var(--text)}
+body{
+  background:
+   radial-gradient(circle at 18% 8%,rgba(0,120,212,.28),transparent 32%),
+   radial-gradient(circle at 85% 100%,rgba(124,77,255,.18),transparent 34%),
+   linear-gradient(135deg,#111827,#202020 54%,#171717);
+  min-height:100vh;padding:22px;
+}
+button,input{font:inherit}
+button{color:var(--text);cursor:pointer}
+button:disabled{opacity:.48;cursor:not-allowed}
+.window{max-width:1300px;min-height:calc(100vh - 44px);margin:auto;border:1px solid var(--line2);border-radius:12px;overflow:hidden;background:var(--mica);box-shadow:var(--shadow);backdrop-filter:blur(30px);display:grid;grid-template-rows:48px 1fr 28px}
+.titlebar{display:grid;grid-template-columns:1fr auto;align-items:center;border-bottom:1px solid var(--line);background:rgba(32,32,32,.82);user-select:none}
+.app-title{display:flex;align-items:center;gap:10px;padding:0 16px;font-weight:600}
+.app-icon{width:24px;height:24px;border-radius:6px;display:grid;place-items:center;background:linear-gradient(135deg,#75d9ff,#5b73ff);color:#07101a;font-weight:900;box-shadow:0 0 20px rgba(96,205,255,.28)}
+.window-actions{height:100%;display:flex}.win-btn{width:48px;border:0;border-left:1px solid transparent;background:transparent}.win-btn:hover{background:rgba(255,255,255,.08)}.win-btn.close:hover{background:#c42b1c}
+.shell{display:grid;grid-template-columns:220px minmax(0,1fr);min-height:0}
+.sidebar{padding:10px;border-right:1px solid var(--line);background:rgba(25,25,25,.54);display:flex;flex-direction:column;gap:4px}
+.nav-btn{width:100%;padding:10px 12px;border:0;border-radius:7px;background:transparent;text-align:left;display:flex;gap:11px;align-items:center;position:relative}
+.nav-btn:hover{background:rgba(255,255,255,.07)}.nav-btn.active{background:rgba(255,255,255,.1)}.nav-btn.active:before{content:"";position:absolute;left:0;width:3px;height:18px;border-radius:3px;background:var(--accent)}
+.sidebar-spacer{flex:1}.side-caption{padding:12px;color:var(--muted);font-size:12px}
+.content{min-width:0;overflow:auto;padding:20px}.page{display:none}.page.active{display:block}
+.toolbar{display:flex;gap:8px;align-items:center;margin-bottom:16px}.page-title{font-size:28px;font-weight:600;margin:0 auto 0 0}.server-pill{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:12px}.dot{width:8px;height:8px;border-radius:50%;background:var(--success);box-shadow:0 0 10px var(--success)}
+.grid{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(280px,.8fr);gap:14px}.stack{display:grid;gap:14px;align-content:start}
+.card{min-width:0;padding:17px;border:1px solid var(--line);border-radius:var(--radius);background:linear-gradient(145deg,rgba(50,50,50,.88),rgba(36,36,36,.88));box-shadow:0 8px 24px rgba(0,0,0,.18)}
+.card h2{font-size:15px;font-weight:600;margin:0 0 14px}.subtle{color:var(--muted);font-size:12px}
+.player{display:grid;grid-template-columns:124px minmax(0,1fr);gap:19px;align-items:center}.cover{width:124px;height:124px;border-radius:8px;object-fit:cover;background:#252525;box-shadow:0 8px 20px rgba(0,0,0,.28)}
+.track-title{font-size:24px;font-weight:600;overflow-wrap:anywhere}.track-meta{color:var(--muted);margin-top:4px}.progress{width:100%;accent-color:var(--accent2);margin-top:16px}.time-row{display:flex;justify-content:space-between;color:var(--muted);font-size:11px}
+.controls{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.btn{min-height:34px;padding:6px 12px;border:1px solid var(--line2);border-radius:6px;background:#333}.btn:hover{background:#3d3d3d;border-color:rgba(255,255,255,.25)}.btn.primary{background:var(--accent2);border-color:var(--accent2)}.btn.primary:hover{background:#1683d8}.btn.active{border-color:var(--accent);color:#bcecff}.btn.danger{color:var(--danger)}
+.field{display:grid;gap:7px;margin:10px 0}.field label{color:var(--muted);font-size:12px}input{width:100%;min-height:34px;padding:7px 10px;color:var(--text);border:1px solid var(--line2);border-radius:5px;background:#252525;outline:none}input:focus{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.notice{padding:10px 12px;border:1px solid var(--line);background:rgba(20,20,20,.42);border-radius:6px;color:var(--muted);font-size:12px;overflow-wrap:anywhere}
+.quick-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.quick-tile{padding:16px;border:1px solid var(--line);border-radius:8px;background:rgba(255,255,255,.035);text-align:left}.quick-tile:hover{background:rgba(255,255,255,.07)}
+.playlist{display:grid;gap:5px;max-height:510px;overflow:auto}.track-row{display:grid;grid-template-columns:20px minmax(0,1fr) auto auto;align-items:center;gap:7px;padding:8px;border:1px solid transparent;border-radius:6px}.track-row:hover{background:rgba(255,255,255,.055);border-color:var(--line)}.track-icon{color:var(--accent)}.track-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer}.track-name small{display:block;color:var(--muted);font-size:10px}.small{min-height:28px;padding:4px 8px;font-size:11px}
+.sync-button{width:100%;padding:10px}.sync-on{background:#174f78}.sync-off{background:#333}.log{max-height:205px;overflow:auto;white-space:pre-wrap;font:11px/1.5 Consolas,monospace;color:#cfcfcf}.statusbar{display:flex;justify-content:space-between;align-items:center;padding:0 10px;border-top:1px solid var(--line);background:rgba(25,25,25,.75);color:var(--muted);font-size:11px}
+.radio-buttons{display:grid;grid-template-columns:1fr 1fr;gap:9px}.radio-state{margin-top:10px}
+@media(max-width:900px){body{padding:0}.window{min-height:100vh;border:0;border-radius:0}.shell{grid-template-columns:74px 1fr}.sidebar{align-items:center}.nav-btn{justify-content:center;font-size:0}.nav-btn span{font-size:20px}.side-caption{display:none}.grid{grid-template-columns:1fr}.content{padding:14px}}
+@media(max-width:560px){.window-actions{display:none}.shell{grid-template-columns:1fr;grid-template-rows:auto 1fr}.sidebar{position:sticky;top:0;z-index:5;flex-direction:row;border-right:0;border-bottom:1px solid var(--line);overflow:auto}.sidebar-spacer,.side-caption{display:none}.nav-btn{width:auto;min-width:48px}.player{grid-template-columns:82px minmax(0,1fr)}.cover{width:82px;height:82px}.track-title{font-size:19px}.quick-grid,.radio-buttons{grid-template-columns:1fr}.statusbar{display:none}}
+</style>
+</head>
+<body>
+<div class="window">
+  <div class="titlebar">
+    <div class="app-title"><div class="app-icon">D</div><span>DIVINARVIS Media Player</span></div>
+    <div class="window-actions"><button class="win-btn">—</button><button class="win-btn">□</button><button class="win-btn close">×</button></div>
+  </div>
+
+  <div class="shell">
+    <nav class="sidebar">
+      <button class="nav-btn active" data-page="home"><span>🏠</span> Accueil</button>
+      <button class="nav-btn" data-page="library"><span>🎵</span> Bibliothèque</button>
+      <button class="nav-btn" data-page="youtube"><span>▶</span> YouTube</button>
+      <button class="nav-btn" data-page="radio"><span>📻</span> Radios</button>
+      <button class="nav-btn" data-page="sync"><span>🔄</span> Synchronisation</button>
+      <div class="sidebar-spacer"></div>
+      <button class="nav-btn" data-page="settings"><span>⚙</span> Paramètres</button>
+      <div class="side-caption">DIVINARVIS V9<br>Windows Edition</div>
+    </nav>
+
+    <main class="content">
+      <section class="page active" id="page-home">
+        <div class="toolbar"><h1 class="page-title">Accueil</h1><div class="server-pill"><span class="dot"></span><span id="serverStatus">Connexion…</span></div></div>
+        <div class="grid">
+          <div class="stack">
+            <div class="card">
+              <div class="player">
+                <img class="cover" src="/static/olga.jpeg" alt="Pochette" onerror="this.onerror=null;this.src='/static/olga.jpg'">
+                <div style="min-width:0">
+                  <div class="subtle">LECTURE EN COURS</div>
+                  <div class="track-title" id="title">Prêt à lire</div>
+                  <div class="track-meta" id="meta">Choisis un morceau</div>
+                  <div class="subtle" id="liveHint">Lecteur en attente</div>
+                </div>
+              </div>
+              <audio id="audio" preload="metadata" playsinline></audio>
+              <input id="progress" class="progress" type="range" min="0" max="1000" value="0">
+              <div class="time-row"><span id="currentTime">0:00</span><span id="duration">0:00</span></div>
+              <div class="controls">
+                <button class="btn" id="prevBtn">⏮ Précédent</button><button class="btn primary" id="playBtn">▶ Lecture</button><button class="btn" id="nextBtn">Suivant ⏭</button>
+                <button class="btn" id="loopBtn">🔁 Boucle OFF</button><button class="btn" id="randomBtn">🔀 Aléatoire OFF</button>
+              </div>
+            </div>
+            <div class="card"><h2>Accès rapide</h2><div class="quick-grid">
+              <button class="quick-tile" data-go="library">🎵<br><strong>Bibliothèque</strong><br><span class="subtle">Fichiers locaux et téléchargés</span></button>
+              <button class="quick-tile" data-go="youtube">▶<br><strong>YouTube vers audio</strong><br><span class="subtle">Importer avec yt-dlp</span></button>
+              <button class="quick-tile" id="capitalQuick">📻<br><strong>Capital</strong><br><span class="subtle">Écouter en direct</span></button>
+              <button class="quick-tile" id="xtraQuick">🎙<br><strong>Capital XTRA</strong><br><span class="subtle">Flux national MP3</span></button>
+            </div></div>
+          </div>
+          <aside class="stack">
+            <div class="card"><h2>Fichiers récents</h2><p class="subtle"><span id="trackCountHome">0</span> élément(s)</p><div id="recentPlaylist" class="playlist"><div class="notice">Chargement…</div></div></div>
+            <div class="card"><h2>État du système</h2><div id="homeStatus" class="notice">DIVINARVIS prêt.</div></div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="page" id="page-library">
+        <div class="toolbar"><h1 class="page-title">Bibliothèque</h1><span class="subtle"><span id="trackCount">0</span> fichier(s)</span></div>
+        <div class="grid">
+          <div class="card"><h2>Musique et médias</h2><div class="controls"><button class="btn" id="refreshBtn">↻ Actualiser</button><button class="btn danger" id="clearBtn">Supprimer tout</button></div><div id="playlist" class="playlist" style="margin-top:12px"><div class="notice">Chargement…</div></div></div>
+          <aside class="card"><h2>Importer des fichiers</h2><div class="field"><label for="fileInput">MP3, M4A, WAV, AAC, MP4, OGG ou FLAC</label><input id="fileInput" type="file" accept=".mp3,.m4a,.wav,.aac,.mp4,.ogg,.flac,audio/*,video/mp4" multiple><button id="uploadBtn" class="btn primary">Ajouter au serveur</button></div><div class="notice">Les accents et les noms d'origine sont maintenant conservés.</div></aside>
+        </div>
+      </section>
+
+      <section class="page" id="page-youtube">
+        <div class="toolbar"><h1 class="page-title">YouTube vers audio</h1></div>
+        <div class="grid"><div class="card"><h2>Télécharger une piste</h2><div class="field"><label for="ytInput">Adresse de la vidéo</label><input id="ytInput" type="url" placeholder="https://www.youtube.com/watch?v=…"><button id="ytBtn" class="btn primary">Télécharger l'audio MP3</button></div><div id="ytStatus" class="notice">Nécessite yt-dlp et FFmpeg sur le serveur.</div></div><aside class="card"><h2>Conseil</h2><div class="notice">Utilise uniquement des contenus que tu as le droit de télécharger. Les fichiers apparaîtront dans Bibliothèque et pourront être supprimés normalement.</div></aside></div>
+      </section>
+
+      <section class="page" id="page-radio">
+        <div class="toolbar"><h1 class="page-title">Radios</h1></div>
+        <div class="grid"><div class="card"><h2>Stations</h2><div class="radio-buttons"><button id="capitalBtn" class="btn primary">▶ Capital</button><button id="xtraBtn" class="btn primary">▶ Capital XTRA</button></div><div id="radioState" class="notice radio-state">Aucune radio active</div></div><aside class="card"><h2>Flux personnalisé</h2><div class="field"><label for="radioUrl">URL audio directe</label><input id="radioUrl" type="url" placeholder="https://…"><button id="customRadioBtn" class="btn">Lire le flux</button></div><div class="notice">Capital XTRA utilise désormais le flux national MP3 avec solution de repli.</div></aside></div>
+      </section>
+
+      <section class="page" id="page-sync">
+        <div class="toolbar"><h1 class="page-title">Synchronisation</h1></div>
+        <div class="grid"><div class="card"><h2>Dell ↔ iPhone</h2><button id="syncToggleBtn" class="btn sync-button sync-off">🔴 SYNCHRO OFF</button><p id="syncHelp" class="subtle">Désactivée par défaut.</p><div id="syncStatus" class="notice">Synchro OFF</div></div><aside class="card"><h2>Journal</h2><div id="journal" class="log">DIVINARVIS prêt.</div><div class="controls"><button id="clearLogBtn" class="btn">Effacer</button></div></aside></div>
+      </section>
+
+      <section class="page" id="page-settings">
+        <div class="toolbar"><h1 class="page-title">Paramètres</h1></div>
+        <div class="grid"><div class="card"><h2>Cookies YouTube</h2><div class="field"><label for="cookiesFile">Fichier cookies.txt</label><input id="cookiesFile" type="file" accept=".txt,text/plain"><button id="cookiesBtn" class="btn">Envoyer cookies.txt</button><button id="clearCookiesBtn" class="btn danger">Supprimer cookies.txt</button></div><div id="cookiesStatus" class="notice">Vérification…</div></div><aside class="card"><h2>À propos</h2><div class="notice">DIVINARVIS Media Player • Windows Style • Flask • Sans Firebase</div></aside></div>
+      </section>
+    </main>
+  </div>
+  <div class="statusbar"><span>DIVINARVIS CORE • ONLINE</span><span id="statusTrack">Aucun média</span></div>
+</div>
+
+<script>
+"use strict";
+const $=id=>document.getElementById(id),audio=$("audio");
+let tracks=[],current=-1,isLoop=false,randomMode=false,currentRadioId=null,portalSyncEnabled=false,lastSeenSyncTs=0,syncFirstPoll=true,syncPollBusy=false;
+const RADIO={
+ capital:{name:"Capital",urls:["https://media-ice.musicradio.com/CapitalUKMP3","https://media-ssl.musicradio.com/Capital"]},
+ xtra:{name:"Capital XTRA",urls:["https://media-ice.musicradio.com/CapitalXTRANationalMP3","https://media-ssl.musicradio.com/CapitalXTRA"]}
+};
+const portalClientId=(()=>{let id=localStorage.getItem("divinarvis_client_id");if(!id){id="device_"+Date.now().toString(36)+"_"+Math.random().toString(36).slice(2,9);localStorage.setItem("divinarvis_client_id",id)}return id})();
+function showPage(name){document.querySelectorAll(".page").forEach(x=>x.classList.toggle("active",x.id===`page-${name}`));document.querySelectorAll(".nav-btn[data-page]").forEach(x=>x.classList.toggle("active",x.dataset.page===name))}
+document.querySelectorAll("[data-page]").forEach(b=>b.addEventListener("click",()=>showPage(b.dataset.page)));document.querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",()=>showPage(b.dataset.go)));
+function log(m){$("journal").textContent=`[${new Date().toLocaleTimeString()}] ${m}\n`+$("journal").textContent;$("homeStatus").textContent=m}
+function timeText(s){return!Number.isFinite(s)||s<0?"0:00":Math.floor(s/60)+":"+String(Math.floor(s%60)).padStart(2,"0")}
+function bytes(n){if(!Number.isFinite(n))return"";if(n<1024)return`${n} o`;if(n<1048576)return`${(n/1024).toFixed(1)} Ko`;return`${(n/1048576).toFixed(1)} Mo`}
+async function api(url,o={}){const r=await fetch(url,{cache:"no-store",...o}),d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||`Erreur HTTP ${r.status}`);return d}
+async function pushSync(action,extra={}){if(!portalSyncEnabled)return;try{await api("/api/sync",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action,sourceId:portalClientId,index:current,isLoop,randomMode,currentTime:Number(audio.currentTime||0),capitalUrl:audio.src,capitalName:$("title").textContent,currentRadioId,...extra})})}catch(e){console.warn(e)}}
+function updateSyncUI(){const b=$("syncToggleBtn");b.textContent=portalSyncEnabled?"🟣 SYNCHRO ON":"🔴 SYNCHRO OFF";b.classList.toggle("sync-on",portalSyncEnabled);b.classList.toggle("sync-off",!portalSyncEnabled);$("syncHelp").textContent=portalSyncEnabled?"Activée : les commandes sont partagées.":"Désactivée par défaut.";$("syncStatus").textContent=portalSyncEnabled?"Synchro ON • écoute des commandes":"Synchro OFF • aucune commande distante"}
+$("syncToggleBtn").onclick=async()=>{try{const r=await api("/api/sync",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"toggleSync",enabled:!portalSyncEnabled,sourceId:portalClientId})});portalSyncEnabled=!!r.enabled;lastSeenSyncTs=Number(r.command?.ts||0);syncFirstPoll=false;updateSyncUI();log(portalSyncEnabled?"Synchronisation activée":"Synchronisation désactivée")}catch(e){log("Erreur synchro : "+e.message)}};
+function updateModes(){$("loopBtn").textContent=isLoop?"🔁 Boucle ON":"🔁 Boucle OFF";$("randomBtn").textContent=randomMode?"🔀 Aléatoire ON":"🔀 Aléatoire OFF";$("loopBtn").classList.toggle("active",isLoop);$("randomBtn").classList.toggle("active",randomMode);audio.loop=isLoop}
+async function loadFiles(){try{tracks=await api("/api/files");renderPlaylist();$("serverStatus").textContent="Serveur connecté"}catch(e){$("serverStatus").textContent="Serveur inaccessible";log("Chargement : "+e.message)}}
+function buildRows(target,items){const list=$(target);list.replaceChildren();if(!items.length){const e=document.createElement("div");e.className="notice";e.textContent="Aucun fichier.";list.append(e);return}items.forEach(track=>{const index=tracks.findIndex(t=>t.name===track.name),row=document.createElement("div");row.className="track-row";const icon=document.createElement("span");icon.className="track-icon";icon.textContent=index===current?"▶":"♪";const name=document.createElement("div");name.className="track-name";name.title=track.name;name.innerHTML="";const main=document.createElement("span");main.textContent=track.displayName||track.name;const small=document.createElement("small");small.textContent=`${bytes(track.size)} • ${new Date(track.modified*1000).toLocaleDateString()}`;name.append(main,small);name.onclick=()=>playIdx(index);const play=document.createElement("button");play.className="btn small";play.textContent="Lire";play.onclick=()=>playIdx(index);const del=document.createElement("button");del.className="btn small danger";del.textContent="Supprimer";del.onclick=()=>deleteTrack(track.name);row.append(icon,name,play,del);list.append(row)})}
+function renderPlaylist(){$("trackCount").textContent=tracks.length;$("trackCountHome").textContent=tracks.length;buildRows("playlist",tracks);buildRows("recentPlaylist",tracks.slice(0,5))}
+async function playIdx(i,remote=false){if(!Number.isInteger(i)||i<0||i>=tracks.length)return;current=i;currentRadioId=null;audio.src=tracks[i].url;$("title").textContent=tracks[i].displayName||tracks[i].name;$("meta").textContent="Bibliothèque DIVINARVIS";$("liveHint").textContent=tracks[i].name;$("statusTrack").textContent=$("title").textContent;renderPlaylist();try{await audio.play()}catch(_){log("Appuie sur Lecture pour autoriser le son.")}if(!remote)pushSync("playIdx",{index:i,currentTime:0})}
+async function tryRadio(station,id,remote=false){current=-1;currentRadioId=id;let pos=0;const attempt=async()=>{if(pos>=station.urls.length){log(`${station.name} indisponible. Essaie Global Player.`);$("radioState").textContent=`Échec de lecture : ${station.name}`;return}const url=station.urls[pos++];audio.src=url;$("title").textContent=station.name;$("meta").textContent="Radio en direct";$("liveHint").textContent="Flux radio";$("radioState").textContent=`Connexion à ${station.name}…`;$("statusTrack").textContent=station.name;try{await audio.play();$("radioState").textContent=`En direct : ${station.name}`;if(!remote)pushSync("capital",{capitalUrl:url,capitalName:station.name,currentRadioId:id,currentTime:0})}catch(_){setTimeout(attempt,350)}};await attempt()}
+function playRadio(url,name,id,remote=false){return tryRadio({name,urls:[url]},id,remote)}
+async function deleteTrack(name){if(!confirm(`Supprimer « ${name} » du serveur ?`))return;try{await api("/api/delete",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({file:name})});if(tracks[current]?.name===name){audio.pause();audio.removeAttribute("src");audio.load();current=-1}await loadFiles();pushSync("delete",{filename:name});log("Supprimé : "+name)}catch(e){log("Suppression impossible : "+e.message)}}
+function moveTrack(d,remote=false){if(!tracks.length)return;let n;if(randomMode&&tracks.length>1){do{n=Math.floor(Math.random()*tracks.length)}while(n===current)}else n=current<0?0:(current+d+tracks.length)%tracks.length;playIdx(n,remote)}
+$("prevBtn").onclick=()=>moveTrack(-1);$("nextBtn").onclick=()=>moveTrack(1);$("playBtn").onclick=async()=>{if(!audio.src&&tracks.length)return playIdx(current>=0?current:0);if(audio.paused){try{await audio.play();pushSync("resume")}catch(_){log("Lecture bloquée par le navigateur.")}}else{audio.pause();pushSync("pause")}};audio.onplay=()=>$("playBtn").textContent="⏸ Pause";audio.onpause=()=>$("playBtn").textContent="▶ Lecture";
+$("loopBtn").onclick=()=>{isLoop=!isLoop;updateModes();pushSync("loop",{isLoop})};$("randomBtn").onclick=()=>{randomMode=!randomMode;updateModes();pushSync("random",{randomMode})};audio.ontimeupdate=()=>{if(Number.isFinite(audio.duration)&&audio.duration>0){$("progress").value=Math.round(audio.currentTime/audio.duration*1000);$("currentTime").textContent=timeText(audio.currentTime);$("duration").textContent=timeText(audio.duration)}};audio.onloadedmetadata=()=>$("duration").textContent=timeText(audio.duration);$("progress").onchange=()=>{if(Number.isFinite(audio.duration)&&audio.duration>0){audio.currentTime=Number($("progress").value)/1000*audio.duration;pushSync("seek",{currentTime:audio.currentTime})}};audio.onended=()=>{if(!isLoop)moveTrack(1)};
+function capital(){tryRadio(RADIO.capital,"capital")}function xtra(){tryRadio(RADIO.xtra,"xtra")}$("capitalBtn").onclick=capital;$("capitalQuick").onclick=capital;$("xtraBtn").onclick=xtra;$("xtraQuick").onclick=xtra;$("customRadioBtn").onclick=()=>{const u=$("radioUrl").value.trim();if(!/^https?:\/\//i.test(u))return log("Entre une URL valide.");playRadio(u,"Radio personnalisée","custom")};
+$("uploadBtn").onclick=async()=>{const fs=Array.from($("fileInput").files||[]);if(!fs.length)return log("Choisis un fichier.");$("uploadBtn").disabled=true;try{for(const f of fs){const form=new FormData();form.append("file",f,f.name);const r=await fetch("/api/upload",{method:"POST",body:form}),d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||"Import impossible")}$("fileInput").value="";await loadFiles();pushSync("newLocal");log("Fichier(s) importé(s) avec leur nom d'origine.")}catch(e){log("Import : "+e.message)}finally{$("uploadBtn").disabled=false}};
+$("refreshBtn").onclick=loadFiles;$("clearBtn").onclick=async()=>{if(!tracks.length||!confirm("Supprimer tous les médias du serveur ?"))return;try{await api("/api/delete-all",{method:"POST"});audio.pause();audio.removeAttribute("src");audio.load();current=-1;await loadFiles();pushSync("clear");log("Bibliothèque vidée.")}catch(e){log("Suppression : "+e.message)}};
+$("ytBtn").onclick=async()=>{const url=$("ytInput").value.trim();if(!url)return $("ytStatus").textContent="Colle une URL d'abord.";$("ytBtn").disabled=true;$("ytStatus").textContent="Téléchargement en cours…";try{const r=await api("/api/youtube",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({url})});$("ytStatus").textContent=r.files?.length?`Ajouté : ${r.files.map(x=>x.displayName).join(", ")}`:(r.title||"Terminé");$("ytInput").value="";await loadFiles();pushSync("newYT");log("Import YouTube terminé.")}catch(e){$("ytStatus").textContent=e.message;log("YouTube : "+e.message)}finally{$("ytBtn").disabled=false}};
+async function refreshCookies(){try{const r=await api("/api/cookies/status");$("cookiesStatus").textContent=r.exists?`cookies.txt présent (${r.size} octets)`:"Aucun cookies.txt"}catch(_){$("cookiesStatus").textContent="Statut indisponible"}}
+$("cookiesBtn").onclick=async()=>{const f=$("cookiesFile").files[0];if(!f)return $("cookiesStatus").textContent="Choisis un fichier.";const form=new FormData();form.append("file",f,f.name);try{const r=await fetch("/api/cookies/upload",{method:"POST",body:form}),d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||"Import impossible");$("cookiesFile").value="";await refreshCookies();log("Cookies importés.")}catch(e){$("cookiesStatus").textContent=e.message}};$("clearCookiesBtn").onclick=async()=>{if(!confirm("Supprimer cookies.txt ?"))return;try{await api("/api/cookies/delete",{method:"POST"});await refreshCookies()}catch(e){$("cookiesStatus").textContent=e.message}};$("clearLogBtn").onclick=()=>$("journal").textContent="";
+async function applyRemote(c){switch(c.action){case"playIdx":await loadFiles();if(Number(c.index)>=0&&Number(c.index)<tracks.length)await playIdx(Number(c.index),true);break;case"pause":audio.pause();break;case"resume":try{await audio.play()}catch(_){}break;case"capital":if(/^https?:\/\//i.test(c.capitalUrl||""))await playRadio(c.capitalUrl,c.capitalName||"Radio",c.currentRadioId||"remote",true);break;case"loop":isLoop=!!c.isLoop;updateModes();break;case"random":randomMode=!!c.randomMode;updateModes();break;case"seek":if(Number.isFinite(audio.duration))audio.currentTime=Math.min(Number(c.currentTime)||0,audio.duration);break;case"delete":case"newLocal":case"newYT":case"clear":await loadFiles();break}}
+async function pollSync(){if(syncPollBusy)return;syncPollBusy=true;try{const r=await api("/api/sync");portalSyncEnabled=!!r.enabled;updateSyncUI();const c=r.command;if(syncFirstPoll){lastSeenSyncTs=Number(c?.ts||0);syncFirstPoll=false;return}if(!portalSyncEnabled||!c)return;const ts=Number(c.ts||0);if(ts<=lastSeenSyncTs)return;lastSeenSyncTs=ts;if(c.sourceId===portalClientId||["toggleSync","syncState"].includes(c.action))return;await applyRemote(c)}catch(_){$("serverStatus").textContent="Serveur inaccessible"}finally{syncPollBusy=false}}
+updateModes();updateSyncUI();loadFiles();refreshCookies();pollSync();setInterval(pollSync,1000);setInterval(loadFiles,15000);log("DIVINARVIS Windows Edition prêt.");
+</script>
+</body>
+</html>
