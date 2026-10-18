@@ -1,8 +1,8 @@
 "use strict";
 
-/* DIVINARVIS V10 - Correctif final radios intégré
-   - Capital & Capital XTRA : lecture directe dans le lecteur interne
-   - Love Radio Russie : ouverture/fermeture du lecteur officiel dans un onglet externe
+/* DIVINARVIS V10 - Correctif final radios
+   - Capital & Capital XTRA : flux audio directs internes
+   - Love Radio : redirige vers www.loveradio.ru dans un nouvel onglet
 */
 (() => {
   const get = id => document.getElementById(id);
@@ -17,21 +17,19 @@
   const radioState = get("radioState");
   const statusTrack = get("statusTrack");
 
-  let activeRadio = null; // "capital", "xtra" ou null
+  let activeRadio = null; // "capital", "xtra"
   let loveTab = null;
 
+  // Flux audio directs vérifiés (HTTPS)
   const CAPITAL_STREAMS = [
-    "https://media-ice.musicradio.com/CapitalUKMP3",
-    "https://media-ssl.musicradio.com/Capital"
+    "https://media-ssl.musicradio.com/Capital",
+    "https://media-ice.musicradio.com/CapitalUKMP3"
   ];
   const XTRA_STREAMS = [
-    "https://media-ice.musicradio.com/CapitalXTRAUKMP3",
-    "https://media-ssl.musicradio.com/CapitalXTRA"
+    "https://media-ssl.musicradio.com/CapitalXTRA",
+    "https://media-ice.musicradio.com/CapitalXTRAUKMP3"
   ];
-  const LOVE_PLAYER = "https://player.loveradio.ru/";
-
-  const oldLoveWindow = get("loveRadioWindow");
-  if (oldLoveWindow) oldLoveWindow.remove();
+  const LOVE_URL = "https://www.loveradio.ru/";
 
   const setState = message => {
     if (radioState) radioState.textContent = message;
@@ -130,12 +128,12 @@
     }
 
     stopRadio();
-    loveTab = window.open(LOVE_PLAYER, "divinarvisLoveRadio");
+    loveTab = window.open(LOVE_URL, "divinarvisLoveRadio");
     if (loveTab) {
-      setState("Love Radio ouverte dans un nouvel onglet");
+      setState("Love Radio (www.loveradio.ru) ouverte dans un nouvel onglet");
       setStatusTrack("Love Radio Russie");
     } else {
-      setState("Le navigateur a bloqué l'onglet Love Radio");
+      setState("Le navigateur a bloqué l'ouverture de Love Radio");
     }
     updateButtons();
   };
