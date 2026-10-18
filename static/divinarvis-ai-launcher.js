@@ -2,24 +2,25 @@
 
 (() => {
   const SHORTCUT_NAME = "DIVINARVIS AI LAUNCHER";
+  const POPUP_FEATURES = "popup=yes,width=1120,height=760,resizable=yes,scrollbars=yes,toolbar=no,menubar=no,location=yes,status=no";
   const WEB_APPS = {
     "ChatGPT": "https://chatgpt.com/",
     "Copilot": "https://copilot.microsoft.com/",
-    "Gemini": "https://gemini.google.com/",
+    "YT": "https://www.youtube.com/",
     "Grok": "https://grok.com/",
-    "Meta AI": "https://www.meta.ai/",
+    "Manus / Meta AI": "https://www.meta.ai/",
+    "AI": "https://ai.com/",
     "Claude": "https://claude.ai/"
   };
-
   const APPS = [
-    ["ChatGPT", "C", "Création et raisonnement", "#159f88"],
-    ["Copilot", "∞", "Tonton Microsoft", "linear-gradient(135deg,#53c9ff,#7857ff,#ef55b8)"],
-    ["Gemini", "✦", "Univers Google", "linear-gradient(135deg,#4078ff,#a666e8)"],
-    ["Grok", "𝕏", "Assistant xAI", "#111"],
-    ["Meta AI", "M", "Assistant Meta", "#1677e8"],
-    ["Claude", "A", "Assistant Anthropic", "#bd643d"]
+    ["ChatGPT", "C", "Frérot", "#159f88"],
+    ["Copilot", "∞", "TONTON", "linear-gradient(135deg,#53c9ff,#7857ff,#ef55b8)"],
+    ["YT", "▶", "Victime", "#ff0033"],
+    ["Grok", "𝕏", "Empereur", "#111"],
+    ["Manus / Meta AI", "M", "Disquetteur", "#1677e8"],
+    ["AI", "AI", "TONTON", "linear-gradient(135deg,#ff9b4a,#e84c9b)"],
+    ["Claude", "A", "Le meilleur poto du Frérot", "#bd643d"]
   ];
-
   const style = document.createElement("style");
   style.textContent = `
     .xp-start{position:relative;z-index:1002}
@@ -111,7 +112,8 @@
       return;
     }
     notify(`Ouverture de ${name}…`);
-    window.open(WEB_APPS[name], "_blank", "noopener,noreferrer");
+    const popup = window.open(WEB_APPS[name], `divinarvis_${name.replace(/[^a-z0-9]/gi, "_")}`, POPUP_FEATURES);
+    if (!popup) notify("Pop-up bloquée : autorise les fenêtres pour DIVINARVIS.");
   };
 
   startButton.addEventListener("click", event => {
