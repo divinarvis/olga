@@ -345,7 +345,7 @@ $("loopBtn").onclick=()=>{isLoop=!isLoop;updateModes();pushSync("loop",{isLoop})
 $("customRadioBtn").onclick=()=>{const u=$("radioUrl").value.trim();if(!/^https?:\/\//i.test(u))return log("Entre une URL valide.");tryRadio({name:"Radio personnalisée",urls:[u]},"custom")};
 $("uploadBtn").onclick=async()=>{const fs=Array.from($("fileInput").files||[]);if(!fs.length)return log("Choisis un fichier.");$("uploadBtn").disabled=true;try{for(const f of fs){const form=new FormData();form.append("file",f,f.name);const r=await fetch("/api/upload",{method:"POST",body:form}),d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error\vert{}\vert{}"Import impossible")}$("fileInput").value="";await loadFiles();pushSync("newLocal");log("Fichier(s) importé(s) avec leur nom d'origine.")}catch(e){log("Import : "+e.message)}finally{$("uploadBtn").disabled=false}};
 $("refreshBtn").onclick=loadFiles;$("clearBtn").onclick=async()=>{if(!tracks.length||!confirm("Supprimer tous les médias du serveur ?"))return;try{await api("/api/delete-all",{method:"POST"});audio.pause();audio.removeAttribute("src");audio.load();current=-1;await loadFiles();pushSync("clear");log("Bibliothèque vidée.")}catch(e){log("Suppression : "+e.message)}};
-$("ytBtn").onclick=async()=>{
+$("ytBtn").onclick=async(){
   const url=$("ytInput").value.trim();
   if(!url)return $("ytStatus").textContent="Colle une URL d'abord.";
   $("ytBtn").disabled=true;
