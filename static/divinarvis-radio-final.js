@@ -77,8 +77,8 @@
 
   function stopCapital() {
     clearInternalAudio();
-    state("Capital arrÃªtÃ©e");
-    status("Aucun mÃ©dia");
+    state("Capital London arrêtée");
+    status("Aucun média");
     if (typeof window.pushSync === "function") {
       window.pushSync("stopRadio", { currentRadioId: "capital" });
     }
@@ -100,13 +100,13 @@
       if (title) title.textContent = "Capital";
       if (meta) meta.textContent = "Radio en direct";
       if (liveHint) liveHint.textContent = "Flux Capital";
-      state("Connexion Ã  Capitalâ¦");
+      state("Connexion Ã  Capital¦");
       status("Capital");
 
       try {
         await audio.play();
         if (!capitalOn || attemptId !== capitalAttempt) return;
-        state("En direct : Capital â¢ retouche le bouton pour arrÃªter");
+        state("En direct : Capital London retouche le bouton pour arrêter");
         refreshButtons();
         if (typeof window.pushSync === "function") {
           window.pushSync("capital", {
@@ -118,13 +118,13 @@
         }
         return;
       } catch (error) {
-        console.warn("DIVINARVIS RADIO: Ã©chec Capital", stream, error);
+        console.warn("DIVINARVIS RADIO: Echec Capital", stream, error);
       }
     }
 
     capitalOn = false;
     state("Capital indisponible depuis ce navigateur");
-    status("Aucun mÃ©dia");
+    status("Aucun média");
     refreshButtons();
   }
 
@@ -144,8 +144,8 @@
       tab.close();
       if (isXtra) xtraTab = null;
       else loveTab = null;
-      state(`${name} fermÃ©e`);
-      status("Aucun mÃ©dia");
+      state(`${name} fermée`);
+      status("Aucun média");
       refreshButtons();
       return;
     }
@@ -162,7 +162,7 @@
       status(name);
       try { tab.focus(); } catch (_) {}
     } else {
-      state(`Ouverture de ${name} bloquÃ©e par le navigateur`);
+      state(`Ouverture de ${name} bloquée par le navigateur`);
     }
     refreshButtons();
   }
@@ -194,5 +194,5 @@
   document.head.appendChild(css);
 
   refreshButtons();
-  console.info("DIVINARVIS RADIO: module chargÃ©");
+  console.info("DIVINARVIS RADIO: module chargé");
 })();
