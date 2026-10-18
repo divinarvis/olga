@@ -62,8 +62,8 @@
     decorate(xtraBtn, tabOpen(xtraTab));
     decorate(loveBtn, tabOpen(loveTab));
 
-    if (capitalBtn) capitalBtn.textContent = capitalPlaying ? "â  Capital" : "â¶ Capital";
-    if (xtraBtn) xtraBtn.textContent = tabOpen(xtraTab) ? "â  XTRA" : "â¶ XTRA";
+    if (capitalBtn) capitalBtn.textContent = "Capital London";
+    if (xtraBtn) xtraBtn.textContent = "Capital XTRA";
   }
 
   function clearInternalAudio() {
