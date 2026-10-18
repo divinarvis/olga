@@ -3,238 +3,87 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#202020">
+<meta name="theme-color" content="#e948a3">
 <title>DIVINARVIS MEDIA PLAYER XPERIENCE</title>
 <style>
-:root{
-  color-scheme:dark;
-  --bg:#202020;--mica:rgba(36,36,36,.86);--mica2:rgba(45,45,45,.76);
-  --surface:#2b2b2b;--surface2:#323232;--line:rgba(255,255,255,.09);
-  --line2:rgba(255,255,255,.16);--text:#f5f5f5;--muted:#aaa;
-  --accent:#60cdff;--accent2:#0078d4;--danger:#ff99a4;--success:#6ccb5f;
-  --shadow:0 18px 48px rgba(0,0,0,.38);--radius:9px;
-}
-*{box-sizing:border-box}
-html,body{margin:0;min-height:100%;font:14px/1.45 "Segoe UI Variable","Segoe UI",sans-serif;color:var(--text)}
-body{
-  background:
-   radial-gradient(circle at 18% 8%,rgba(0,120,212,.28),transparent 32%),
-   radial-gradient(circle at 85% 100%,rgba(124,77,255,.18),transparent 34%),
-   linear-gradient(135deg,#111827,#202020 54%,#171717);
-  min-height:100vh;padding:22px;
-}
-button,input{font:inherit}
-button{color:var(--text);cursor:pointer}
-button:disabled{opacity:.48;cursor:not-allowed}
-.window{max-width:1300px;min-height:calc(100vh - 44px);margin:auto;border:1px solid var(--line2);border-radius:12px;overflow:hidden;background:var(--mica);box-shadow:var(--shadow);backdrop-filter:blur(30px);display:grid;grid-template-rows:48px 1fr 28px}
-.titlebar{display:grid;grid-template-columns:1fr auto;align-items:center;border-bottom:1px solid var(--line);background:rgba(32,32,32,.82);user-select:none}
-.app-title{display:flex;align-items:center;gap:10px;padding:0 16px;font-weight:600}
-.app-icon{width:24px;height:24px;border-radius:6px;display:grid;place-items:center;background:linear-gradient(135deg,#75d9ff,#5b73ff);color:#07101a;font-weight:900;box-shadow:0 0 20px rgba(96,205,255,.28)}
-.window-actions{height:100%;display:flex}.win-btn{width:48px;border:0;border-left:1px solid transparent;background:transparent}.win-btn:hover{background:rgba(255,255,255,.08)}.win-btn.close:hover{background:#c42b1c}
-.shell{display:grid;grid-template-columns:220px minmax(0,1fr);min-height:0}
-.sidebar{padding:10px;border-right:1px solid var(--line);background:rgba(25,25,25,.54);display:flex;flex-direction:column;gap:4px}
-.nav-btn{width:100%;padding:10px 12px;border:0;border-radius:7px;background:transparent;text-align:left;display:flex;gap:11px;align-items:center;position:relative}
-.nav-btn:hover{background:rgba(255,255,255,.07)}.nav-btn.active{background:rgba(255,255,255,.1)}.nav-btn.active:before{content:"";position:absolute;left:0;width:3px;height:18px;border-radius:3px;background:var(--accent)}
-.sidebar-spacer{flex:1}.side-caption{padding:12px;color:var(--muted);font-size:12px}
-.content{min-width:0;overflow:auto;padding:20px}.page{display:none}.page.active{display:block}
-.toolbar{display:flex;gap:8px;align-items:center;margin-bottom:16px}.page-title{font-size:28px;font-weight:600;margin:0 auto 0 0}.server-pill{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:12px}.dot{width:8px;height:8px;border-radius:50%;background:var(--success);box-shadow:0 0 10px var(--success)}
-.grid{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(280px,.8fr);gap:14px}.stack{display:grid;gap:14px;align-content:start}
-.card{min-width:0;padding:17px;border:1px solid var(--line);border-radius:var(--radius);background:linear-gradient(145deg,rgba(50,50,50,.88),rgba(36,36,36,.88));box-shadow:0 8px 24px rgba(0,0,0,.18)}
-.card h2{font-size:15px;font-weight:600;margin:0 0 14px}.subtle{color:var(--muted);font-size:12px}
-.player{display:grid;grid-template-columns:124px minmax(0,1fr);gap:19px;align-items:center}.cover{width:124px;height:124px;border-radius:8px;object-fit:cover;background:#252525;box-shadow:0 8px 20px rgba(0,0,0,.28)}
-.track-title{font-size:24px;font-weight:600;overflow-wrap:anywhere}.track-meta{color:var(--muted);margin-top:4px}.progress{width:100%;accent-color:var(--accent2);margin-top:16px}.time-row{display:flex;justify-content:space-between;color:var(--muted);font-size:11px}
-.controls{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.btn{min-height:34px;padding:6px 12px;border:1px solid var(--line2);border-radius:6px;background:#333}.btn:hover{background:#3d3d3d;border-color:rgba(255,255,255,.25)}.btn.primary{background:var(--accent2);border-color:var(--accent2)}.btn.primary:hover{background:#1683d8}.btn.active{border-color:var(--accent);color:#bcecff}.btn.danger{color:var(--danger)}
-.field{display:grid;gap:7px;margin:10px 0}.field label{color:var(--muted);font-size:12px}input{width:100%;min-height:34px;padding:7px 10px;color:var(--text);border:1px solid var(--line2);border-radius:5px;background:#252525;outline:none}input:focus{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
-.notice{padding:10px 12px;border:1px solid var(--line);background:rgba(20,20,20,.42);border-radius:6px;color:var(--muted);font-size:12px;overflow-wrap:anywhere}
-.quick-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.quick-tile{padding:16px;border:1px solid var(--line);border-radius:8px;background:rgba(255,255,255,.035);text-align:left}.quick-tile:hover{background:rgba(255,255,255,.07)}
-.playlist{display:grid;gap:5px;max-height:510px;overflow:auto}.track-row{display:grid;grid-template-columns:20px minmax(0,1fr) auto auto;align-items:center;gap:7px;padding:8px;border:1px solid transparent;border-radius:6px}.track-row:hover{background:rgba(255,255,255,.055);border-color:var(--line)}.track-icon{color:var(--accent)}.track-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer}.track-name small{display:block;color:var(--muted);font-size:10px}.small{min-height:28px;padding:4px 8px;font-size:11px}
-.sync-button{width:100%;padding:10px}.sync-on{background:#174f78}.sync-off{background:#333}.log{max-height:205px;overflow:auto;white-space:pre-wrap;font:11px/1.5 Consolas,monospace;color:#cfcfcf}.statusbar{display:flex;justify-content:space-between;align-items:center;padding:0 10px;border-top:1px solid var(--line);background:rgba(25,25,25,.75);color:var(--muted);font-size:11px}
-.radio-state{margin-top:10px}
+:root{color-scheme:dark;--text:#fff5ff;--muted:#aaa;--line:rgba(255,255,255,.12);--accent:#e948a3;--danger:#ff7088;--xp-pink:#e948a3;--xp-dark:#a62075;--xp-text:#35152c;--xp-muted:#865d7b;--xp-shadow:0 16px 38px rgba(103,22,80,.38)}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;font:14px/1.45 Tahoma,"Trebuchet MS","Segoe UI",sans-serif;color:var(--xp-text)}
+body{min-height:100vh;padding:18px 18px 52px;background:radial-gradient(ellipse at 15% 22%,rgba(255,255,255,.92) 0 8%,transparent 28%),radial-gradient(ellipse at 78% 16%,rgba(255,255,255,.78) 0 7%,transparent 25%),linear-gradient(#74c9ff 0 53%,#f5a8d5 54% 61%,#81ca58 62% 100%);background-attachment:fixed}
+button,input{font:inherit}button{cursor:pointer}button:disabled{opacity:.48;cursor:not-allowed}
+.window{max-width:1280px;min-height:calc(100vh - 76px);margin:auto;border:3px solid var(--xp-dark);border-radius:9px 9px 5px 5px;overflow:hidden;background:#f7edf6;box-shadow:var(--xp-shadow);display:grid;grid-template-rows:36px 1fr 27px}
+.titlebar{display:grid;grid-template-columns:1fr auto;align-items:center;min-height:36px;background:linear-gradient(#ff8fc8,#ef4da6 18%,#cb2786 62%,#a61f70);border-bottom:1px solid #73124d;box-shadow:inset 0 1px rgba(255,255,255,.75),inset 0 -1px rgba(92,0,56,.5);user-select:none}.app-title{display:flex;align-items:center;gap:8px;padding-left:8px;color:#fff;font-weight:700;text-shadow:1px 1px #7b1557}.app-icon{width:23px;height:23px;border-radius:4px;border:1px solid rgba(255,255,255,.8);display:grid;place-items:center;background:linear-gradient(135deg,#fff,#ffd4ec 40%,#ff6db8 41%,#bc2780);color:#8f1761;font-weight:900}.window-actions{display:flex;gap:3px;padding:4px 5px}.win-btn{width:25px;height:25px;border:1px solid #fff;border-radius:4px;background:linear-gradient(#ffaad5,#d83c94);color:#fff;font-weight:900;padding:0}.win-btn.close{background:linear-gradient(#ff8f9b,#e83255)}
+.shell{display:grid;grid-template-columns:214px minmax(0,1fr);min-height:0;background:#f7edf6}.sidebar{padding:9px 7px;border-right:1px solid #c895bd;background:linear-gradient(#f1c9e7,#ead8ff 42%,#d6e7ff);display:flex;flex-direction:column;gap:4px}.nav-btn{width:100%;padding:9px 10px;border:1px solid transparent;border-radius:5px;background:transparent;color:#4b2440;text-align:left;font-weight:600;display:flex;gap:11px;align-items:center;position:relative;text-shadow:0 1px #fff}.nav-btn:hover{background:rgba(255,255,255,.62);border-color:#d896c3}.nav-btn.active{color:#8c135b;background:linear-gradient(#fff,#ffd9ef);border-color:#bd6da2}.nav-btn.active:before{content:"";position:absolute;left:0;width:3px;height:20px;border-radius:3px;background:#e4399b;box-shadow:0 0 5px #ff7fc1}.sidebar-spacer{flex:1}.side-caption{padding:12px;color:#845b7b;font-size:12px;border-top:1px solid rgba(150,80,130,.22)}
+.content{min-width:0;overflow:auto;padding:17px;background:linear-gradient(135deg,#fff8fd,#f4eafb 60%,#eef5ff)}.page{display:none}.page.active{display:block}.toolbar{display:flex;gap:8px;align-items:center;margin-bottom:16px}.page-title{font:700 27px/1 "Trebuchet MS",Tahoma,sans-serif;color:#8e1c62;margin:0 auto 0 0;text-shadow:0 1px #fff}.server-pill{display:flex;align-items:center;gap:7px;color:#5c4760;font-size:12px}.dot{width:8px;height:8px;border-radius:50%;background:#55b943;box-shadow:0 0 7px #58c841}.grid{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(280px,.8fr);gap:14px}.stack{display:grid;gap:14px;align-content:start}.card{min-width:0;padding:15px;border:1px solid #d5a3c7;border-radius:7px;background:linear-gradient(#fff,#fff7fc 72%,#f7e7f3);box-shadow:inset 0 0 0 1px rgba(255,255,255,.9),0 2px 5px rgba(106,45,90,.14);color:var(--xp-text)}.card h2{font:600 15px/1.3 "Trebuchet MS",Tahoma,sans-serif;color:#9b1d67;margin:0 0 14px;border-bottom:1px solid #e9c6de;padding-bottom:7px}.subtle,.track-meta,.time-row{color:var(--xp-muted);font-size:12px}
+.player{display:grid;grid-template-columns:124px minmax(0,1fr);gap:19px;align-items:center}.cover{width:124px;height:124px;border:2px solid #fff;border-radius:5px;object-fit:cover;background:#f2cfe6;box-shadow:0 0 0 1px #c477aa,2px 3px 7px rgba(80,25,65,.25)}.track-title{font:700 24px/1.25 "Trebuchet MS",Tahoma,sans-serif;color:#6e174c;overflow-wrap:anywhere}.progress{width:100%;accent-color:var(--xp-pink);margin-top:16px}.time-row{display:flex;justify-content:space-between;font-size:11px}
+.controls{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.btn{min-height:34px;padding:6px 12px;border:1px solid #b86e9e;border-radius:4px;color:#4d183a;background:linear-gradient(#fff,#f9ddec 48%,#efc3de 52%,#fff1f8);box-shadow:inset 0 0 0 1px #fff,1px 1px 2px rgba(80,25,65,.16);font-weight:600}.btn:hover{border-color:#e13e98;background:linear-gradient(#fff,#ffeaf5 48%,#f7d0e6 52%,#fff)}.btn.primary{color:#fff;border-color:#8f165d;background:linear-gradient(#ff87c4,#df3795 48%,#bf2179 52%,#e8449f);text-shadow:1px 1px #851557}.btn.active,.radio-btn-on{border-color:#b01b72!important;box-shadow:inset 0 0 0 2px rgba(255,255,255,.85),0 0 10px rgba(227,62,152,.45)!important}.btn.danger{color:#b21f44;border-color:#cf7990}
+.field{display:grid;gap:7px;margin:10px 0}.field label{color:var(--xp-muted);font-size:12px}input{width:100%;min-height:34px;padding:7px 10px;color:#442039;border:1px solid #bd8fac;border-radius:3px;background:#fff;outline:none}input:focus{border-color:#e33a98;box-shadow:0 0 0 1px #ffc5e4}.notice{padding:10px 12px;border:1px solid #ddb6d1;border-radius:5px;color:#76536d;background:#fffafd;font-size:12px;overflow-wrap:anywhere}.quick-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.quick-tile{padding:16px;border:1px solid #d5a3c7;border-radius:6px;color:#4d183a;background:linear-gradient(150deg,#fff,#ffe5f2 58%,#f0dbff);text-align:left}.quick-tile:hover{border-color:#df5ba4;background:linear-gradient(150deg,#fff,#ffd4e9 58%,#e5d0ff)}
+.playlist{display:grid;gap:5px;max-height:510px;overflow:auto;scrollbar-color:#e34ba0 #f8e7f1}.track-row{display:grid;grid-template-columns:20px minmax(0,1fr) auto auto;align-items:center;gap:7px;padding:8px;border:1px solid transparent;border-radius:4px;color:#54203f}.track-row:hover{background:#ffe9f4;border-color:#e2adcb}.track-icon{color:#d72e8e}.track-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer}.track-name small{display:block;color:#99758e;font-size:10px}.small{min-height:28px;padding:4px 8px;font-size:11px}.sync-button{width:100%;padding:10px}.sync-on{color:#fff!important;background:linear-gradient(#d869ff,#9b39d2)!important;border-color:#78309e!important}.sync-off{background:linear-gradient(#fff,#edd8e7)!important}.log{max-height:205px;overflow:auto;white-space:pre-wrap;color:#5d3a54;background:#fff;border:1px inset #d7abc6;border-radius:3px;padding:8px;font:11px/1.5 "Lucida Console",Consolas,monospace}.statusbar{display:flex;justify-content:space-between;align-items:center;padding:0 10px;border-top:1px solid #c98bb6;color:#3e1a34;background:linear-gradient(#f5cce6,#dda4cd);font-size:11px}
+.radio-buttons{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.radio-state{margin-top:10px}.love-radio-btn{display:flex;align-items:center;justify-content:center;gap:6px;color:#fff!important;background:linear-gradient(#ff766f,#db1e27 48%,#bd1119 52%,#f13b40)!important;border-color:#a30d14!important;text-shadow:1px 1px #790a0f}.love-radio-icon{width:22px;height:22px;flex:0 0 22px;border-radius:4px;object-fit:cover;background:#e5262d;border:1px solid rgba(255,255,255,.78)}
+.xp-taskbar{position:fixed;left:0;right:0;bottom:0;height:36px;z-index:999;display:flex;align-items:center;background:linear-gradient(#ef57ac,#c92482 18%,#98145f 78%,#b82372);border-top:2px solid #ff8bca;box-shadow:0 -1px 5px rgba(74,7,48,.35)}.xp-start{height:36px;min-width:108px;border:0;border-radius:0 18px 18px 0;color:#fff;padding:0 18px 0 12px;font:italic 700 15px Tahoma,sans-serif;text-shadow:1px 1px #5d5c0a;background:linear-gradient(#a9e870,#58b83b 44%,#2d8d27 55%,#63ba42);box-shadow:inset 0 2px rgba(255,255,255,.55),2px 0 4px rgba(0,0,0,.25)}.xp-task-app{margin-left:10px;color:#fff;border:1px solid rgba(255,255,255,.28);border-radius:3px;padding:4px 12px;background:rgba(255,255,255,.12);font-size:12px}.xp-tray{margin-left:auto;height:100%;display:flex;align-items:center;gap:8px;padding:0 12px;color:#fff;background:rgba(92,19,113,.38);border-left:1px solid rgba(255,255,255,.22);font-size:11px}
+@media(max-width:900px){body{padding:0 0 40px}.window{width:100%;min-height:calc(100vh - 40px);border-left:0;border-right:0;border-radius:0}.shell{display:flex;flex-direction:column}.sidebar{width:100%;padding:4px 6px;display:flex;flex-direction:row;justify-content:space-around;align-items:center;position:sticky;top:0;z-index:100;border-right:0;border-bottom:1px solid #c895bd;background:linear-gradient(90deg,#f4cce9,#e0d5ff);gap:2px}.nav-btn{width:auto;min-width:38px;height:36px;padding:4px 8px;justify-content:center;font-size:0}.nav-btn span{font-size:20px}.sidebar-spacer,.side-caption{display:none}.content{width:100%;padding:10px 8px 16px;overflow:visible}.grid{grid-template-columns:1fr;gap:10px}.card{padding:11px}.player{grid-template-columns:72px minmax(0,1fr);gap:10px}.cover{width:72px;height:72px}.track-title{font-size:19px}.quick-grid{grid-template-columns:1fr;gap:7px}.radio-buttons{grid-template-columns:repeat(3,minmax(0,1fr));gap:4px}.radio-buttons .btn{padding:6px 2px;font-size:11px}.love-radio-icon{width:16px;height:16px;flex-basis:16px}.controls{gap:6px;justify-content:center}.controls .btn{flex:1 1 calc(50% - 6px);min-height:38px;font-size:12px;padding:6px 4px}.controls #playBtn{flex:1 1 100%}.xp-taskbar{height:40px}.xp-start{min-width:92px;height:40px;font-size:13px;padding:0 9px 0 8px}.xp-task-app{display:none}.xp-tray{gap:4px;padding:0 5px;font-size:9px}.statusbar{display:none}}
+@media(max-width:380px){.track-title{font-size:17px}.radio-buttons .btn{font-size:10px}}
 </style>
 
-<style id="xp-girly-theme">
-:root{
-  --xp-pink:#e948a3;
-  --xp-pink-dark:#a62075;
-  --xp-pink-light:#ff9fd3;
-  --xp-lilac:#b993ff;
-  --xp-blue:#3d74e7;
-  --xp-cream:#fff8fc;
-  --xp-window:#f7edf6;
-  --xp-panel:#fff8fd;
-  --xp-line:#d8a6cb;
-  --xp-text:#35152c;
-  --xp-muted:#865d7b;
-  --xp-green:#57ae36;
-  --xp-shadow:0 16px 38px rgba(103,22,80,.38);
-}
-html,body{font-family:Tahoma,"Trebuchet MS","Segoe UI",sans-serif;color:var(--xp-text)}
-body{
-  padding:18px 18px 52px;
-  background:
-    radial-gradient(ellipse at 15% 22%,rgba(255,255,255,.92) 0 8%,transparent 28%),
-    radial-gradient(ellipse at 78% 16%,rgba(255,255,255,.78) 0 7%,transparent 25%),
-    linear-gradient(#74c9ff 0 53%,#f5a8d5 54% 61%,#81ca58 62% 100%);
-  background-attachment:fixed;
-}
-.window{
-  max-width:1280px;min-height:calc(100vh - 76px);
-  border:3px solid var(--xp-pink-dark);border-radius:9px 9px 5px 5px;
-  background:var(--xp-window);box-shadow:var(--xp-shadow);
-  grid-template-rows:36px 1fr 27px;
-}
-.titlebar{
-  min-height:36px;
-  background:linear-gradient(#ff8fc8 0%,#ef4da6 18%,#cb2786 62%,#a61f70 100%);
-  border-bottom:1px solid #73124d;
-  box-shadow:inset 0 1px rgba(255,255,255,.75),inset 0 -1px rgba(92,0,56,.5);
-}
-.app-title{color:white;font-weight:700;text-shadow:1px 1px #7b1557;padding-left:8px}
-.app-icon{
-  width:23px;height:23px;border-radius:4px;border:1px solid rgba(255,255,255,.8);
-  background:linear-gradient(135deg,#fff,#ffd4ec 40%,#ff6db8 41%,#bc2780);
-  color:#8f1761;box-shadow:inset 0 0 3px white,1px 1px 2px rgba(0,0,0,.35)
-}
-.window-actions{gap:3px;padding:4px 5px}.win-btn{
-  width:25px;height:25px;border:1px solid white!important;border-radius:4px!important;
-  background:linear-gradient(#ffaad5,#d83c94)!important;color:#fff;font-weight:900;
-  box-shadow:inset 0 0 0 1px #a51e70,1px 1px 2px rgba(0,0,0,.35);padding:0
-}
-.win-btn:hover{filter:brightness(1.1)}.win-btn.close{background:linear-gradient(#ff8f9b,#e83255)!important}.win-btn.close:hover{background:#e21e42!important}
-.shell{grid-template-columns:214px minmax(0,1fr);background:var(--xp-window)}
-.sidebar{
-  border-right:1px solid #c895bd;padding:9px 7px;
-  background:linear-gradient(180deg,#f1c9e7 0%,#ead8ff 42%,#d6e7ff 100%)
-}
-.nav-btn{
-  color:#4b2440;font-weight:600;border:1px solid transparent;border-radius:5px;
-  padding:9px 10px;text-shadow:0 1px white
-}
-.nav-btn:hover{background:rgba(255,255,255,.62);border-color:#d896c3}
-.nav-btn.active{
-  color:#8c135b;background:linear-gradient(#fff,#ffd9ef);border-color:#bd6da2;
-  box-shadow:inset 0 0 0 1px white,0 1px 2px rgba(100,35,80,.18)
-}
-.nav-btn.active:before{background:#e4399b;height:20px;box-shadow:0 0 5px #ff7fc1}
-.side-caption{color:#845b7b;border-top:1px solid rgba(150,80,130,.22);margin-top:6px;padding-top:12px}
-.content{padding:17px;background:linear-gradient(135deg,#fff8fd,#f4eafb 60%,#eef5ff)}
-.page-title{font-family:"Trebuchet MS",Tahoma,sans-serif;color:#8e1c62;font-size:27px;font-weight:700;text-shadow:0 1px #fff}
-.server-pill{color:#5c4760}.dot{background:#55b943;box-shadow:0 0 7px #58c841}
-.card{
-  border:1px solid #d5a3c7;border-radius:7px;padding:15px;
-  background:linear-gradient(#fff,#fff7fc 72%,#f7e7f3);
-  box-shadow:inset 0 0 0 1px rgba(255,255,255,.9),0 2px 5px rgba(106,45,90,.14);
-  color:var(--xp-text)
-}
-.card h2{
-  color:#9b1d67;font-family:"Trebuchet MS",Tahoma,sans-serif;font-size:15px;
-  border-bottom:1px solid #e9c6de;padding-bottom:7px
-}
-.subtle,.track-meta,.time-row{color:var(--xp-muted)}
-.cover{border:2px solid white;border-radius:5px;background:#f2cfe6;box-shadow:0 0 0 1px #c477aa,2px 3px 7px rgba(80,25,65,.25)}
-.track-title{color:#6e174c;font-family:"Trebuchet MS",Tahoma,sans-serif;font-weight:700}
-.progress{accent-color:var(--xp-pink)}
-.btn{
-  color:#4d183a;border:1px solid #b86e9e;border-radius:4px;
-  background:linear-gradient(#fff,#f9ddec 48%,#efc3de 52%,#fff1f8);
-  box-shadow:inset 0 0 0 1px white,1px 1px 2px rgba(80,25,65,.16);font-weight:600
-}
-.btn:hover{background:linear-gradient(#fff,#ffeaf5 48%,#f7d0e6 52%,#fff);border-color:#e13e98}
-.btn:active{background:linear-gradient(#eebdd9,#fff);box-shadow:inset 1px 1px 2px rgba(80,25,65,.24)}
-.btn.primary{
-  color:white;border-color:#8f165d;background:linear-gradient(#ff87c4,#df3795 48%,#bf2179 52%,#e8449f);
-  text-shadow:1px 1px #851557;box-shadow:inset 0 1px rgba(255,255,255,.55),1px 1px 2px rgba(62,15,48,.25)
-}
-.btn.primary:hover{background:linear-gradient(#ff9dd0,#ef4da7 48%,#cc2784 52%,#f35dad)}
-.btn.active{border-color:#b01b72;color:#8c135b;background:#ffd9ed}.btn.danger{color:#b21f44;border-color:#cf7990}
-input{
-  color:#442039;background:white;border:1px solid #bd8fac;border-radius:3px;
-  box-shadow:inset 1px 1px 2px rgba(80,30,65,.12)
-}
-input:focus{border-color:#e33a98;box-shadow:0 0 0 1px #ffc5e4}
-.notice{color:#76536d;border:1px solid #ddb6d1;background:#fffafd;border-radius:5px}
-.quick-tile{
-  color:#4d183a;border:1px solid #d5a3c7;border-radius:6px;
-  background:linear-gradient(150deg,#fff,#ffe5f2 58%,#f0dbff);box-shadow:inset 0 0 0 1px white
-}
-.quick-tile:hover{background:linear-gradient(150deg,#fff,#ffd4e9 58%,#e5d0ff);border-color:#df5ba4}
-.playlist{scrollbar-color:#e34ba0 #f8e7f1}.track-row{color:#54203f;border-radius:4px}.track-row:hover{background:#ffe9f4;border-color:#e2adcb}.track-icon{color:#d72e8e}.track-name small{color:#99758e}
-.sync-on{color:white!important;background:linear-gradient(#d869ff,#9b39d2)!important;border-color:#78309e!important}.sync-off{background:linear-gradient(#fff,#edd8e7)!important}
-.log{color:#5d3a54;background:#fff;border:1px inset #d7abc6;border-radius:3px;padding:8px;font-family:"Lucida Console",Consolas,monospace}
-.radio-state{background:#fff7fc}
-.statusbar{
-  color:#3e1a34;border-top:1px solid #c98bb6;
-  background:linear-gradient(#f5cce6,#dda4cd);box-shadow:inset 0 1px white;font-size:11px
-}
-.xp-taskbar{
-  position:fixed;left:0;right:0;bottom:0;height:36px;z-index:999;
-  display:flex;align-items:center;
-  background:linear-gradient(#ef57ac 0%,#c92482 18%,#98145f 78%,#b82372 100%);
-  border-top:2px solid #ff8bca;box-shadow:0 -1px 5px rgba(74,7,48,.35)
-}
-.xp-start{
-  height:36px;min-width:108px;border:0;border-radius:0 18px 18px 0;color:#fff;
-  padding:0 18px 0 12px;font:italic 700 15px Tahoma,sans-serif;text-shadow:1px 1px #5d5c0a;
-  background:linear-gradient(#a9e870,#58b83b 44%,#2d8d27 55%,#63ba42);
-  box-shadow:inset 0 2px rgba(255,255,255,.55),2px 0 4px rgba(0,0,0,.25)
-}
-.xp-start:hover{filter:brightness(1.08)}
-.xp-task-app{margin-left:10px;color:white;border:1px solid rgba(255,255,255,.28);border-radius:3px;padding:4px 12px;background:rgba(255,255,255,.12);font-size:12px}
-.xp-tray{margin-left:auto;height:100%;display:flex;align-items:center;gap:8px;padding:0 12px;color:white;background:rgba(92,19,113,.38);border-left:1px solid rgba(255,255,255,.22);font-size:11px}
+<style id="divinarvis-mobile-polish-final">
+@media (max-width:900px){
+  /* Barre de navigation iPhone : icones seules, toujours sur une seule ligne */
+  .sidebar{
+    display:grid!important;
+    grid-template-columns:repeat(6,minmax(0,1fr))!important;
+    width:100%!important;
+    gap:2px!important;
+    padding:4px!important;
+    overflow:hidden!important;
+  }
+  .nav-btn{
+    width:100%!important;
+    min-width:0!important;
+    height:38px!important;
+    padding:0!important;
+    gap:0!important;
+    justify-content:center!important;
+    overflow:hidden!important;
+    font-size:0!important;
+    white-space:nowrap!important;
+  }
+  .nav-btn span{
+    display:block!important;
+    margin:0!important;
+    font-size:20px!important;
+    line-height:1!important;
+  }
+  .sidebar-spacer,.side-caption{display:none!important}
 
-/* FORCE ALIGNEMENT HORIZONTAL DES BOUTONS RADIOS */
-.radio-buttons{
-  display: grid !important;
-  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-  gap: 10px !important;
-}
-.love-radio-btn{display:flex;align-items:center;justify-content:center;gap:6px;background:linear-gradient(#ff766f,#db1e27 48%,#bd1119 52%,#f13b40)!important;border-color:#a30d14!important;color:#fff!important;text-shadow:1px 1px #790a0f!important}
-.love-radio-icon{width:22px;height:22px;flex:0 0 22px;border-radius:4px;object-fit:cover;background:#e5262d;border:1px solid rgba(255,255,255,.78)}
-
-@media(max-width:700px){
-  .radio-buttons{grid-template-columns:repeat(3,minmax(0,1fr)) !important; gap:4px !important;}
-  .btn, .love-radio-btn { padding:6px 2px !important; font-size:11px !important; }
-  .love-radio-icon { width:16px; height:16px; flex:0 0 16px; }
-}
-</style>
-
-<style id="mobile-responsive-fix">
-@media (max-width:700px){
-  html,body{min-width:0;overflow-x:hidden}
-  body{padding:0 0 44px}
-  .window{width:100%;min-height:calc(100vh - 44px);border-left:0;border-right:0;border-radius:0;display:block}
-  .titlebar{min-height:42px}
-  .app-title{font-size:12px;line-height:1.15;padding:4px 7px;gap:6px}
-  .app-title span{max-width:190px;white-space:normal}
-  .window-actions{padding:4px 3px;gap:2px}
-  .win-btn{width:27px!important;height:27px!important}
-  .shell{display:block;min-height:0}
-  .sidebar{width:100%;height:auto;min-height:0;padding:4px 3px;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:3px;border-right:0;border-bottom:1px solid #c895bd}
-  .nav-btn{width:100%;min-height:52px;padding:4px 2px;display:flex;flex-direction:column;justify-content:center;gap:1px;text-align:center;font-size:10px;line-height:1.1;white-space:normal}
-  .nav-btn span{font-size:18px;line-height:1.1}
-  .sidebar-spacer{display:none}
-  .side-caption{grid-column:1/-1;margin:0;padding:4px 6px;border-top:0;text-align:center;font-size:10px}
-  .content{width:100%;padding:10px 8px 16px;overflow:visible}
-  .grid{grid-template-columns:minmax(0,1fr);gap:10px}
-  .stack{gap:10px}
-  .card{padding:11px}
-  .player{grid-template-columns:72px minmax(0,1fr);gap:10px}
-  .cover{width:72px;height:72px}
-  .track-title{font-size:19px}
-  .quick-grid{grid-template-columns:1fr;gap:7px}
-  .radio-buttons{grid-template-columns:repeat(3,minmax(0,1fr))!important}
-  .track-row{grid-template-columns:18px minmax(0,1fr) auto;gap:4px}
-  .track-row .danger{grid-column:2;justify-self:start}
-  .xp-taskbar{height:40px}
-  .xp-start{min-width:92px;height:40px;font-size:13px;padding-left:8px;padding-right:9px}
-  .xp-task-app{min-width:0;max-width:45%;margin-left:4px;padding:3px 6px;font-size:10px;white-space:normal;line-height:1.05}
-  .xp-tray{gap:4px;padding:0 5px;font-size:9px}
+  /* Commandes du player : grille nette et symetrique */
+  #page-home .controls{
+    display:grid!important;
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    gap:6px!important;
+    align-items:stretch!important;
+  }
+  #page-home .controls .btn{
+    width:100%!important;
+    min-width:0!important;
+    min-height:40px!important;
+    margin:0!important;
+    padding:6px 4px!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    text-align:center!important;
+    line-height:1.15!important;
+    font-size:11px!important;
+    white-space:normal!important;
+  }
+  #page-home #prevBtn{grid-column:1}
+  #page-home #playBtn{grid-column:2}
+  #page-home #nextBtn{grid-column:3}
+  #page-home #loopBtn{grid-column:1 / span 1}
+  #page-home #randomBtn{grid-column:2 / span 2}
 }
 @media (max-width:380px){
-  .sidebar{grid-template-columns:repeat(4,minmax(0,1fr))}
-  .nav-btn{font-size:9px}
-  .app-title span{max-width:145px}
-  .track-title{font-size:17px}
+  .nav-btn span{font-size:18px!important}
+  #page-home .controls .btn{font-size:10px!important;padding:5px 2px!important}
 }
 </style>
 </head>
@@ -242,9 +91,8 @@ input:focus{border-color:#e33a98;box-shadow:0 0 0 1px #ffc5e4}
 <div class="window">
   <div class="titlebar">
     <div class="app-title"><div class="app-icon">D</div><span>DIVINARVIS MEDIA PLAYER XPERIENCE</span></div>
-    <div class="window-actions"><button class="win-btn">—</button><button class="win-btn">□</button><button class="win-btn close">×</button></div>
+    <div class="window-actions"><button class="win-btn" type="button">—</button><button class="win-btn" type="button">□</button><button class="win-btn close" type="button">×</button></div>
   </div>
-
   <div class="shell">
     <nav class="sidebar">
       <button class="nav-btn active" data-page="home"><span>🏠</span> Accueil</button>
@@ -256,157 +104,71 @@ input:focus{border-color:#e33a98;box-shadow:0 0 0 1px #ffc5e4}
       <button class="nav-btn" data-page="settings"><span>⚙</span> Paramètres</button>
       <div class="side-caption">DIVINARVIS V10<br>XP GIRLY EXPERIENCE</div>
     </nav>
-
     <main class="content">
       <section class="page active" id="page-home">
         <div class="toolbar"><h1 class="page-title">Accueil</h1><div class="server-pill"><span class="dot"></span><span id="serverStatus">Connexion…</span></div></div>
         <div class="grid">
           <div class="stack">
             <div class="card">
-              <div class="player">
-                <img class="cover" src="/static/olga.jpeg" alt="Pochette" onerror="this.onerror=null;this.src='/static/olga.jpg'">
-                <div style="min-width:0">
-                  <div class="subtle">LECTURE EN COURS</div>
-                  <div class="track-title" id="title">Prêt à lire</div>
-                  <div class="track-meta" id="meta">Choisis un morceau</div>
-                  <div class="subtle" id="liveHint">Lecteur en attente</div>
-                </div>
-              </div>
+              <div class="player"><img class="cover" src="/static/olga.jpeg" alt="Pochette" onerror="this.onerror=null;this.src='/static/olga.jpg'"><div style="min-width:0"><div class="subtle">LECTURE EN COURS</div><div class="track-title" id="title">Prêt à lire</div><div class="track-meta" id="meta">Choisis un morceau</div><div class="subtle" id="liveHint">Lecteur en attente</div></div></div>
               <audio id="audio" preload="metadata" playsinline></audio>
               <input id="progress" class="progress" type="range" min="0" max="1000" value="0">
               <div class="time-row"><span id="currentTime">0:00</span><span id="duration">0:00</span></div>
-              <div class="controls">
-                <button class="btn" id="prevBtn">⏮ Précédent</button><button class="btn primary" id="playBtn">▶️ Lecture</button><button class="btn" id="nextBtn">Suivant ⏭</button>
-                <button class="btn" id="loopBtn">🔁 Boucle OFF</button><button class="btn" id="randomBtn">🔀 Aléatoire OFF</button>
-              </div>
+              <div class="controls"><button class="btn" id="prevBtn">⏮ Précédent</button><button class="btn primary" id="playBtn">▶️ Lecture</button><button class="btn" id="nextBtn">Suivant ⏭</button><button class="btn" id="loopBtn">🔁 Boucle OFF</button><button class="btn" id="randomBtn">🔀 Aléatoire OFF</button></div>
             </div>
-            <div class="card"><h2>Accès rapide</h2><div class="quick-grid">
-              <button class="quick-tile" data-go="library">🎵<br><strong>Bibliothèque</strong><br><span class="subtle">Fichiers locaux et téléchargés</span></button>
-              <button class="quick-tile" data-go="youtube">▶️<br><strong>YouTube vers audio</strong><br><span class="subtle">Importer avec yt-dlp</span></button>
-              <button class="quick-tile" id="capitalQuick">📻<br><strong>Capital</strong><br><span class="subtle">Écouter en direct</span></button>
-              <button class="quick-tile" id="xtraQuick">🎙<br><strong>Capital XTRA</strong><br><span class="subtle">Flux national MP3</span></button>
-            </div></div>
+            <div class="card"><h2>Accès rapide</h2><div class="quick-grid"><button class="quick-tile" data-go="library">🎵<br><strong>Bibliothèque</strong><br><span class="subtle">Fichiers locaux et téléchargés</span></button><button class="quick-tile" data-go="youtube">▶️<br><strong>YouTube vers audio</strong><br><span class="subtle">Importer avec yt-dlp</span></button><button class="quick-tile" id="capitalQuick">📻<br><strong>Capital</strong><br><span class="subtle">Écouter en direct</span></button><button class="quick-tile" id="xtraQuick">🎙<br><strong>Capital XTRA</strong><br><span class="subtle">Ouvrir Radioplayer</span></button></div></div>
           </div>
-          <aside class="stack">
-            <div class="card"><h2>Fichiers récents</h2><p class="subtle"><span id="trackCountHome">0</span> élément(s)</p><div id="recentPlaylist" class="playlist"><div class="notice">Chargement…</div></div></div>
-            <div class="card"><h2>État du système</h2><div id="homeStatus" class="notice">DIVINARVIS prêt.</div></div>
-          </aside>
+          <aside class="stack"><div class="card"><h2>Fichiers récents</h2><p class="subtle"><span id="trackCountHome">0</span> élément(s)</p><div id="recentPlaylist" class="playlist"><div class="notice">Chargement…</div></div></div><div class="card"><h2>État du système</h2><div id="homeStatus" class="notice">DIVINARVIS prêt.</div></div></aside>
         </div>
       </section>
-
-      <section class="page" id="page-library">
-        <div class="toolbar"><h1 class="page-title">Bibliothèque</h1><span class="subtle"><span id="trackCount">0</span> fichier(s)</span></div>
-        <div class="grid">
-          <div class="card"><h2>Musique et médias</h2><div class="controls"><button class="btn" id="refreshBtn">↻ Actualiser</button><button class="btn danger" id="clearBtn">Supprimer tout</button></div><div id="playlist" class="playlist" style="margin-top:12px"><div class="notice">Chargement…</div></div></div>
-          <aside class="card"><h2>Importer des fichiers</h2><div class="field"><label for="fileInput">MP3, M4A, WAV, AAC, MP4, OGG ou FLAC</label><input id="fileInput" type="file" accept=".mp3,.m4a,.wav,.aac,.mp4,.ogg,.flac,audio/*,video/mp4" multiple><button id="uploadBtn" class="btn primary">Ajouter au serveur</button></div><div class="notice">Les accents et les noms d'origine sont maintenant conservés.</div></aside>
-        </div>
-      </section>
-
-      <section class="page" id="page-youtube">
-        <div class="toolbar"><h1 class="page-title">YouTube vers audio</h1></div>
-        <div class="grid"><div class="card"><h2>Télécharger une piste</h2><div class="field"><label for="ytInput">Adresse de la vidéo</label><input id="ytInput" type="url" placeholder="https://www.youtube.com/watch?v=…"><button id="ytBtn" class="btn primary">Télécharger l'audio MP3</button></div><div id="ytStatus" class="notice">Nécessite yt-dlp et FFmpeg sur le serveur.</div></div><aside class="card"><h2>Conseil</h2><div class="notice">Utilise uniquement des contenus que tu as le droit de télécharger. Les fichiers apparaîtront dans Bibliothèque et pourront être supprimés normalement.</div></aside></div>
-      </section>
-
-      <section class="page" id="page-radio">
-        <div class="toolbar"><h1 class="page-title">Radios</h1></div>
-        <div class="grid">
-          <div class="card">
-            <h2>Stations</h2>
-            <div class="radio-buttons">
-              <button id="capitalBtn" class="btn primary">▶️ Capital</button>
-              <button id="loveRadioBtn" class="btn love-radio-btn"><img class="love-radio-icon" src="/static/loveradio.jpg" alt=""><span>Love Radio</span></button>
-              <button id="xtraBtn" class="btn primary">▶️ XTRA</button>
-            </div>
-            <div id="radioState" class="notice radio-state">Aucune radio active</div>
-          </div>
-          <aside class="card">
-            <h2>Flux personnalisé</h2>
-            <div class="field"><label for="radioUrl">URL audio directe</label><input id="radioUrl" type="url" placeholder="https://…"><button id="customRadioBtn" class="btn">Lire le flux</button></div>
-            <div class="notice">Capital XTRA utilise désormais le flux direct intégré dans le lecteur.</div>
-          </aside>
-        </div>
-      </section>
-
-      <section class="page" id="page-sync">
-        <div class="toolbar"><h1 class="page-title">Synchronisation</h1></div>
-        <div class="grid"><div class="card"><h2>Dell ↔️ iPhone</h2><button id="syncToggleBtn" class="btn sync-button sync-off">🔴 SYNCHRO OFF</button><p id="syncHelp" class="subtle">Désactivée par défaut.</p><div id="syncStatus" class="notice">Synchro OFF</div></div><aside class="card"><h2>Journal</h2><div id="journal" class="log">DIVINARVIS prêt.</div><div class="controls"><button id="clearLogBtn" class="btn">Effacer</button></div></aside></div>
-      </section>
-
-      <section class="page" id="page-settings">
-        <div class="toolbar"><h1 class="page-title">Paramètres</h1></div>
-        <div class="grid"><div class="card"><h2>Cookies YouTube</h2><div class="field"><label for="cookiesFile">Fichier cookies.txt</label><input id="cookiesFile" type="file" accept=".txt,text/plain"><button id="cookiesBtn" class="btn">Envoyer cookies.txt</button><button id="clearCookiesBtn" class="btn danger">Supprimer cookies.txt</button></div><div id="cookiesStatus" class="notice">Vérification…</div></div><aside class="card"><h2>À propos</h2><div class="notice">DIVINARVIS Media Player • XP Girly Experience • Flask • Siri Ready</div></aside></div>
-      </section>
+      <section class="page" id="page-library"><div class="toolbar"><h1 class="page-title">Bibliothèque</h1><span class="subtle"><span id="trackCount">0</span> fichier(s)</span></div><div class="grid"><div class="card"><h2>Musique et médias</h2><div class="controls"><button class="btn" id="refreshBtn">↻ Actualiser</button><button class="btn danger" id="clearBtn">Supprimer tout</button></div><div id="playlist" class="playlist" style="margin-top:12px"><div class="notice">Chargement…</div></div></div><aside class="card"><h2>Importer des fichiers</h2><div class="field"><label for="fileInput">MP3, M4A, WAV, AAC, MP4, OGG ou FLAC</label><input id="fileInput" type="file" accept=".mp3,.m4a,.wav,.aac,.mp4,.ogg,.flac,audio/*,video/mp4" multiple><button id="uploadBtn" class="btn primary">Ajouter au serveur</button></div><div class="notice">Les accents et noms d'origine sont conservés.</div></aside></div></section>
+      <section class="page" id="page-youtube"><div class="toolbar"><h1 class="page-title">YouTube vers audio</h1></div><div class="grid"><div class="card"><h2>Télécharger une piste</h2><div class="field"><label for="ytInput">Adresse de la vidéo</label><input id="ytInput" type="url" placeholder="https://www.youtube.com/watch?v=…"><button id="ytBtn" class="btn primary">Télécharger l'audio MP3</button></div><div id="ytStatus" class="notice">Nécessite yt-dlp et FFmpeg sur le serveur.</div></div><aside class="card"><h2>Conseil</h2><div class="notice">Utilise uniquement des contenus que tu as le droit de télécharger.</div></aside></div></section>
+      <section class="page" id="page-radio"><div class="toolbar"><h1 class="page-title">Radios</h1></div><div class="grid"><div class="card"><h2>Stations</h2><div class="radio-buttons"><button id="capitalBtn" class="btn primary">▶ Capital</button><button id="loveRadioBtn" class="btn love-radio-btn"><img class="love-radio-icon" src="/static/loveradio.jpg" alt=""><span>Love Radio</span></button><button id="xtraBtn" class="btn primary">▶ XTRA</button></div><div id="radioState" class="notice radio-state">Aucune radio active</div></div><aside class="card"><h2>Flux personnalisé</h2><div class="field"><label for="radioUrl">URL audio directe</label><input id="radioUrl" type="url" placeholder="https://…"><button id="customRadioBtn" class="btn">Lire le flux</button></div><div class="notice">Capital joue dans DIVINARVIS. XTRA et Love Radio s'ouvrent dans leur lecteur web.</div></aside></div></section>
+      <section class="page" id="page-sync"><div class="toolbar"><h1 class="page-title">Synchronisation</h1></div><div class="grid"><div class="card"><h2>Dell ↔️ iPhone</h2><button id="syncToggleBtn" class="btn sync-button sync-off">🔴 SYNCHRO OFF</button><p id="syncHelp" class="subtle">Désactivée par défaut.</p><div id="syncStatus" class="notice">Synchro OFF</div></div><aside class="card"><h2>Journal</h2><div id="journal" class="log">DIVINARVIS prêt.</div><div class="controls"><button id="clearLogBtn" class="btn">Effacer</button></div></aside></div></section>
+      <section class="page" id="page-settings"><div class="toolbar"><h1 class="page-title">Paramètres</h1></div><div class="grid"><div class="card"><h2>Cookies YouTube</h2><div class="field"><label for="cookiesFile">Fichier cookies.txt</label><input id="cookiesFile" type="file" accept=".txt,text/plain"><button id="cookiesBtn" class="btn">Envoyer cookies.txt</button><button id="clearCookiesBtn" class="btn danger">Supprimer cookies.txt</button></div><div id="cookiesStatus" class="notice">Vérification…</div></div><aside class="card"><h2>À propos</h2><div class="notice">DIVINARVIS Media Player • XP Girly Experience • Flask</div></aside></div></section>
     </main>
   </div>
   <div class="statusbar"><span>DIVINARVIS CORE • ONLINE</span><span id="statusTrack">Aucun média</span></div>
 </div>
-
-<div class="xp-taskbar">
-  <button class="xp-start">🌸 démarrer</button>
-  <div class="xp-task-app">🎵 DIVINARVIS MEDIA PLAYER XPERIENCE</div>
-  <div class="xp-tray">🔊 🌐 <span id="xpClock">--:--</span></div>
-</div>
-
-<script src="/static/divinarvis-ai-launcher.js"></script>
-<script src="/static/divinarvis-radio-final.js"></script>
+<div class="xp-taskbar"><button class="xp-start">🌸 démarrer</button><div class="xp-task-app">🎵 DIVINARVIS MEDIA PLAYER XPERIENCE</div><div class="xp-tray">🔊 🌐 <span id="xpClock">--:--</span></div></div>
 
 <script>
 "use strict";
 const $=id=>document.getElementById(id),audio=$("audio");
 let tracks=[],current=-1,isLoop=false,randomMode=false,currentRadioId=null,portalSyncEnabled=false,lastSeenSyncTs=0,syncFirstPoll=true,syncPollBusy=false;
 const portalClientId=(()=>{let id=localStorage.getItem("divinarvis_client_id");if(!id){id="device_"+Date.now().toString(36)+"_"+Math.random().toString(36).slice(2,9);localStorage.setItem("divinarvis_client_id",id)}return id})();
-function showPage(name){document.querySelectorAll(".page").forEach(x=>x.classList.toggle("active",x.id===`page-${name}`));document.querySelectorAll(".nav-btn[data-page]").forEach(x=>x.classList.toggle("active",x.dataset.page===name))}
+function showPage(name){document.querySelectorAll(".page").forEach(x=>x.classList.toggle("active",x.id===`page-${name}`));document.querySelectorAll(".nav-btn[data-page]").forEach(x=>x.classList.toggle("active",x.dataset.page===name))} window.showPage=showPage;
 document.querySelectorAll("[data-page]").forEach(b=>b.addEventListener("click",()=>showPage(b.dataset.page)));document.querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",()=>showPage(b.dataset.go)));
-function log(m){$("journal").textContent=`[${new Date().toLocaleTimeString()}] ${m}\n`+$("journal").textContent;$("homeStatus").textContent=m}
+function log(m){if($("journal"))$("journal").textContent=`[${new Date().toLocaleTimeString()}] ${m}\n`+$("journal").textContent;if($("homeStatus"))$("homeStatus").textContent=m}
 function timeText(s){return!Number.isFinite(s)||s<0?"0:00":Math.floor(s/60)+":"+String(Math.floor(s%60)).padStart(2,"0")}
 function bytes(n){if(!Number.isFinite(n))return"";if(n<1024)return`${n} o`;if(n<1048576)return`${(n/1024).toFixed(1)} Ko`;return`${(n/1048576).toFixed(1)} Mo`}
 async function api(url,o={}){const r=await fetch(url,{cache:"no-store",...o}),d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||`Erreur HTTP ${r.status}`);return d}
-async function pushSync(action,extra={}){if(!portalSyncEnabled)return;try{await api("/api/sync",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action,sourceId:portalClientId,index:current,isLoop,randomMode,currentTime:Number(audio.currentTime||0),capitalUrl:audio.src,capitalName:$("title").textContent,currentRadioId,...extra})})}catch(e){console.warn(e)}}
-function updateSyncUI(){const b=$("syncToggleBtn");b.textContent=portalSyncEnabled?"🟣 SYNCHRO ON":"🔴 SYNCHRO OFF";b.classList.toggle("sync-on",portalSyncEnabled);b.classList.toggle("sync-off",!portalSyncEnabled);$("syncHelp").textContent=portalSyncEnabled?"Activée : les commandes sont partagées.":"Désactivée par défaut.";$("syncStatus").textContent=portalSyncEnabled?"Synchro ON • écoute des commandes":"Synchro OFF • aucune commande distante"}
+async function pushSync(action,extra={}){if(!portalSyncEnabled)return;try{await api("/api/sync",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action,sourceId:portalClientId,index:current,isLoop,randomMode,currentTime:Number(audio.currentTime||0),capitalUrl:audio.src,capitalName:$("title").textContent,currentRadioId,...extra})})}catch(e){console.warn("sync",e)}} window.pushSync=pushSync;
+function updateSyncUI(){const b=$("syncToggleBtn");if(!b)return;b.textContent=portalSyncEnabled?"🟣 SYNCHRO ON":"🔴 SYNCHRO OFF";b.classList.toggle("sync-on",portalSyncEnabled);b.classList.toggle("sync-off",!portalSyncEnabled);$("syncHelp").textContent=portalSyncEnabled?"Activée : les commandes sont partagées.":"Désactivée par défaut.";$("syncStatus").textContent=portalSyncEnabled?"Synchro ON • écoute des commandes":"Synchro OFF • aucune commande distante"}
 $("syncToggleBtn").onclick=async()=>{try{const r=await api("/api/sync",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"toggleSync",enabled:!portalSyncEnabled,sourceId:portalClientId})});portalSyncEnabled=!!r.enabled;lastSeenSyncTs=Number(r.command?.ts||0);syncFirstPoll=false;updateSyncUI();log(portalSyncEnabled?"Synchronisation activée":"Synchronisation désactivée")}catch(e){log("Erreur synchro : "+e.message)}};
 function updateModes(){$("loopBtn").textContent=isLoop?"🔁 Boucle ON":"🔁 Boucle OFF";$("randomBtn").textContent=randomMode?"🔀 Aléatoire ON":"🔀 Aléatoire OFF";$("loopBtn").classList.toggle("active",isLoop);$("randomBtn").classList.toggle("active",randomMode);audio.loop=isLoop}
-async function loadFiles(){try{tracks=await api("/api/files");renderPlaylist();$("serverStatus").textContent="Serveur connecté"}catch(e){$("serverStatus").textContent="Serveur inaccessible";log("Chargement : "+e.message)}}
-function buildRows(target,items){const list=$(target);list.replaceChildren();if(!items.length){const e=document.createElement("div");e.className="notice";e.textContent="Aucun fichier.";list.append(e);return}items.forEach(track=>{const index=tracks.findIndex(t=>t.name===track.name),row=document.createElement("div");row.className="track-row";const icon=document.createElement("span");icon.className="track-icon";icon.textContent=index===current?"▶️":"♪";const name=document.createElement("div");name.className="track-name";name.title=track.name;name.innerHTML="";const main=document.createElement("span");main.textContent=track.displayName||track.name;const small=document.createElement("small");small.textContent=`${bytes(track.size)} • ${new Date(track.modified*1000).toLocaleDateString()}`;name.append(main,small);name.onclick=()=>playIdx(index);const play=document.createElement("button");play.className="btn small";play.textContent="Lire";play.onclick=()=>playIdx(index);const del=document.createElement("button");del.className="btn small danger";del.textContent="Supprimer";del.onclick=()=>deleteTrack(track.name);row.append(icon,name,play,del);list.append(row)})}
+async function loadFiles(){try{tracks=await api("/api/files");renderPlaylist();$("serverStatus").textContent="Serveur connecté";$("homeStatus").textContent="Connexion API opérationnelle."}catch(e){$("serverStatus").textContent="Serveur inaccessible";log("Chargement : "+e.message)}}
+function buildRows(target,items){const list=$(target);if(!list)return;list.replaceChildren();if(!items.length){const e=document.createElement("div");e.className="notice";e.textContent="Aucun fichier.";list.append(e);return}items.forEach(track=>{const index=tracks.findIndex(t=>t.name===track.name),row=document.createElement("div");row.className="track-row";const icon=document.createElement("span");icon.className="track-icon";icon.textContent=index===current?"▶":"♪";const name=document.createElement("div");name.className="track-name";name.title=track.name;const main=document.createElement("span");main.textContent=track.displayName||track.name;const small=document.createElement("small");small.textContent=`${bytes(track.size)} • ${new Date(track.modified*1000).toLocaleDateString()}`;name.append(main,small);name.onclick=()=>playIdx(index);const play=document.createElement("button");play.className="btn small";play.textContent="Lire";play.onclick=()=>playIdx(index);const del=document.createElement("button");del.className="btn small danger";del.textContent="Supprimer";del.onclick=()=>deleteTrack(track.name);row.append(icon,name,play,del);list.append(row)})}
 function renderPlaylist(){$("trackCount").textContent=tracks.length;$("trackCountHome").textContent=tracks.length;buildRows("playlist",tracks);buildRows("recentPlaylist",tracks.slice(0,5))}
-async function playIdx(i,remote=false){if(!Number.isInteger(i)||i<0||i>=tracks.length)return;current=i;currentRadioId=null;audio.src=tracks[i].url;$("title").textContent=tracks[i].displayName||tracks[i].name;$("meta").textContent="Bibliothèque DIVINARVIS";$("liveHint").textContent=tracks[i].name;$("statusTrack").textContent=$("title").textContent;renderPlaylist();try{await audio.play()}catch(_){log("Appuie sur Lecture pour autoriser le son.")}if(!remote)pushSync("playIdx",{index:i,currentTime:0})}
+async function playIdx(i,remote=false){if(!Number.isInteger(i)||i<0||i>=tracks.length)return;current=i;currentRadioId=null;audio.src=tracks[i].url;$("title").textContent=tracks[i].displayName||tracks[i].name;$("meta").textContent="Bibliothèque DIVINARVIS";$("liveHint").textContent=tracks[i].name;$("statusTrack").textContent=$("title").textContent;renderPlaylist();try{await audio.play()}catch(_){log("Appuie sur Lecture pour autoriser le son.")}if(!remote)pushSync("playIdx",{index:i,currentTime:0})} window.playIdx=playIdx;
 async function deleteTrack(name){if(!confirm(`Supprimer « ${name} » du serveur ?`))return;try{await api("/api/delete",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({file:name})});if(tracks[current]?.name===name){audio.pause();audio.removeAttribute("src");audio.load();current=-1}await loadFiles();pushSync("delete",{filename:name});log("Supprimé : "+name)}catch(e){log("Suppression impossible : "+e.message)}}
-function moveTrack(d,remote=false){if(!tracks.length)return;let n;if(randomMode&&tracks.length>1){do{n=Math.floor(Math.random()*tracks.length)}while(n===current)}else n=current<0?0:(current+d+tracks.length)%tracks.length;playIdx(n,remote)}
-$("prevBtn").onclick=()=>moveTrack(-1);$("nextBtn").onclick=()=>moveTrack(1);$("playBtn").onclick=async()=>{if(!audio.src&&tracks.length)return playIdx(current>=0?current:0);if(audio.paused){try{await audio.play();pushSync("resume")}catch(_){log("Lecture bloquée par le navigateur.")}}else{audio.pause();pushSync("pause")}};audio.onplay=()=>$("playBtn").textContent="⏸ Pause";audio.onpause=()=>$("playBtn").textContent="▶️ Lecture";
-$("loopBtn").onclick=()=>{isLoop=!isLoop;updateModes();pushSync("loop",{isLoop})};$("randomBtn").onclick=()=>{randomMode=!randomMode;updateModes();pushSync("random",{randomMode})};audio.ontimeupdate=()=>{if(Number.isFinite(audio.duration)&&audio.duration>0){$("progress").value=Math.round(audio.currentTime/audio.duration*1000);$("currentTime").textContent=timeText(audio.currentTime);$("duration").textContent=timeText(audio.duration)}};audio.onloadedmetadata=()=>$("duration").textContent=timeText(audio.duration);$("progress").onchange=()=>{if(Number.isFinite(audio.duration)&&audio.duration>0){audio.currentTime=Number($("progress").value)/1000*audio.duration;pushSync("seek",{currentTime:audio.currentTime})}};audio.onended=()=>{if(!isLoop)moveTrack(1)};
-async function playCustomRadio(url){
-  audio.src=url;
-  $("title").textContent="Radio personnalisée";
-  $("meta").textContent="Radio en direct";
-  $("liveHint").textContent="Flux personnalisé";
-  $("radioState").textContent="Connexion au flux personnalisé…";
-  $("statusTrack").textContent="Radio personnalisée";
-  try{await audio.play();$("radioState").textContent="Flux personnalisé en direct";}
-  catch(_){$("radioState").textContent="Lecture bloquée : appuie sur Lecture.";}
-}
+function moveTrack(d,remote=false){if(!tracks.length)return;let n;if(randomMode&&tracks.length>1){do{n=Math.floor(Math.random()*tracks.length)}while(n===current)}else n=current<0?0:(current+d+tracks.length)%tracks.length;playIdx(n,remote)} window.moveTrack=moveTrack;
+$("prevBtn").onclick=()=>moveTrack(-1);$("nextBtn").onclick=()=>moveTrack(1);$("playBtn").onclick=async()=>{if(!audio.src&&tracks.length)return playIdx(current>=0?current:0);if(audio.paused){try{await audio.play();pushSync("resume")}catch(_){log("Lecture bloquée par le navigateur.")}}else{audio.pause();pushSync("pause")}};audio.addEventListener("play",()=>$("playBtn").textContent="⏸ Pause");audio.addEventListener("pause",()=>$("playBtn").textContent="▶️ Lecture");
+$("loopBtn").onclick=()=>{isLoop=!isLoop;updateModes();pushSync("loop",{isLoop})};$("randomBtn").onclick=()=>{randomMode=!randomMode;updateModes();pushSync("random",{randomMode})};audio.addEventListener("timeupdate",()=>{if(Number.isFinite(audio.duration)&&audio.duration>0){$("progress").value=Math.round(audio.currentTime/audio.duration*1000);$("currentTime").textContent=timeText(audio.currentTime);$("duration").textContent=timeText(audio.duration)}});audio.addEventListener("loadedmetadata",()=>$("duration").textContent=timeText(audio.duration));$("progress").onchange=()=>{if(Number.isFinite(audio.duration)&&audio.duration>0){audio.currentTime=Number($("progress").value)/1000*audio.duration;pushSync("seek",{currentTime:audio.currentTime})}};audio.addEventListener("ended",()=>{if(!isLoop)moveTrack(1)});
+async function playCustomRadio(url){current=-1;currentRadioId="custom";audio.src=url;$("title").textContent="Radio personnalisée";$("meta").textContent="Radio en direct";$("liveHint").textContent="Flux personnalisé";$("radioState").textContent="Connexion au flux personnalisé…";$("statusTrack").textContent="Radio personnalisée";try{await audio.play();$("radioState").textContent="Flux personnalisé en direct"}catch(_){$("radioState").textContent="Lecture bloquée : appuie sur Lecture."}}
 $("customRadioBtn").onclick=()=>{const u=$("radioUrl").value.trim();if(!/^https?:\/\//i.test(u))return log("Entre une URL valide.");playCustomRadio(u)};
-$("uploadBtn").onclick=async()=>{const fs=Array.from($("fileInput").files||[]);if(!fs.length)return log("Choisis un fichier.");$("uploadBtn").disabled=true;try{for(const f of fs){const form=new FormData();form.append("file",f,f.name);const r=await fetch("/api/upload",{method:"POST",body:form}),d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||"Import impossible")}$("fileInput").value="";await loadFiles();pushSync("newLocal");log("Fichier(s) importé(s) avec leur nom d'origine.")}catch(e){log("Import : "+e.message)}finally{$("uploadBtn").disabled=false}};$("refreshBtn").onclick=loadFiles;$("clearBtn").onclick=async()=>{if(!tracks.length||!confirm("Supprimer tous les médias du serveur ?"))return;try{await api("/api/delete-all",{method:"POST"});audio.pause();audio.removeAttribute("src");audio.load();current=-1;await loadFiles();pushSync("clear");log("Bibliothèque vidée.")}catch(e){log("Suppression : "+e.message)}};
-
-$("ytBtn").onclick=async()=>{
-  const url=$("ytInput").value.trim();
-  if(!url)return $("ytStatus").textContent="Colle une URL d'abord.";
-  $("ytBtn").disabled=true;
-  $("ytStatus").textContent="Téléchargement et conversion en cours...";
-  try{
-    const r=await api("/api/youtube",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({url})});
-    $("ytInput").value="";
-    await loadFiles();
-    pushSync("newYt");
-    $("ytStatus").textContent=`Téléchargé : ${r.name||"Succès"}`;
-    log("YouTube téléchargé : "+(r.name||url));
-  }catch(e){
-    $("ytStatus").textContent="Erreur : "+e.message;
-    log("YouTube erreur : "+e.message);
-  }finally{
-    $("ytBtn").disabled=false;
-  }
-};
-loadFiles();
+$("uploadBtn").onclick=async()=>{const fs=Array.from($("fileInput").files||[]);if(!fs.length)return log("Choisis un fichier.");$("uploadBtn").disabled=true;try{for(const f of fs){const form=new FormData();form.append("file",f,f.name);const r=await fetch("/api/upload",{method:"POST",body:form}),d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||"Import impossible")}$("fileInput").value="";await loadFiles();pushSync("newLocal");log("Fichier(s) importé(s).") }catch(e){log("Import : "+e.message)}finally{$("uploadBtn").disabled=false}};
+$("refreshBtn").onclick=loadFiles;$("clearBtn").onclick=async()=>{if(!tracks.length||!confirm("Supprimer tous les médias du serveur ?"))return;try{await api("/api/delete-all",{method:"POST"});audio.pause();audio.removeAttribute("src");audio.load();current=-1;await loadFiles();pushSync("clear");log("Bibliothèque vidée.")}catch(e){log("Suppression : "+e.message)}};
+$("ytBtn").onclick=async()=>{const url=$("ytInput").value.trim();if(!url)return $("ytStatus").textContent="Colle une URL d'abord.";$("ytBtn").disabled=true;$("ytStatus").textContent="Téléchargement et conversion en cours…";try{const r=await api("/api/youtube",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({url})});$("ytInput").value="";await loadFiles();pushSync("newYT");$("ytStatus").textContent=r.files?.length?`Ajouté : ${r.files.map(x=>x.displayName||x.name).join(", ")}`:(r.title||"Téléchargement terminé");log("Import YouTube terminé.")}catch(e){$("ytStatus").textContent="Erreur : "+e.message;log("YouTube : "+e.message)}finally{$("ytBtn").disabled=false}};
+async function refreshCookies(){try{const r=await api("/api/cookies/status");$("cookiesStatus").textContent=r.exists?`cookies.txt présent (${r.size} octets)`:"Aucun cookies.txt"}catch(e){$("cookiesStatus").textContent="Statut indisponible"}}
+$("cookiesBtn").onclick=async()=>{const f=$("cookiesFile").files[0];if(!f)return $("cookiesStatus").textContent="Choisis un fichier.";const form=new FormData();form.append("file",f,f.name);try{const r=await fetch("/api/cookies/upload",{method:"POST",body:form}),d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||"Import impossible");$("cookiesFile").value="";await refreshCookies();log("Cookies importés.")}catch(e){$("cookiesStatus").textContent=e.message}};$("clearCookiesBtn").onclick=async()=>{if(!confirm("Supprimer cookies.txt ?"))return;try{await api("/api/cookies/delete",{method:"POST"});await refreshCookies()}catch(e){$("cookiesStatus").textContent=e.message}};$("clearLogBtn").onclick=()=>$("journal").textContent="";
+async function applyRemote(c){switch(c.action){case"playIdx":await loadFiles();if(Number(c.index)>=0&&Number(c.index)<tracks.length)await playIdx(Number(c.index),true);break;case"pause":audio.pause();break;case"resume":try{await audio.play()}catch(_){}break;case"capital":if(/^https?:\/\//i.test(c.capitalUrl||"")){currentRadioId=c.currentRadioId||"remote";audio.src=c.capitalUrl;$("title").textContent=c.capitalName||"Radio";try{await audio.play()}catch(_){}}break;case"stopRadio":audio.pause();audio.removeAttribute("src");audio.load();currentRadioId=null;break;case"loop":isLoop=!!c.isLoop;updateModes();break;case"toggleLoop":isLoop=!isLoop;updateModes();break;case"random":randomMode=!!c.randomMode;updateModes();break;case"toggleRandom":randomMode=!randomMode;updateModes();break;case"next":moveTrack(1,true);break;case"previous":moveTrack(-1,true);break;case"seek":if(Number.isFinite(audio.duration))audio.currentTime=Math.min(Number(c.currentTime)||0,audio.duration);break;case"delete":case"newLocal":case"newYT":case"newYt":case"clear":await loadFiles();break}}
+async function pollSync(){if(syncPollBusy)return;syncPollBusy=true;try{const r=await api("/api/sync");portalSyncEnabled=!!r.enabled;updateSyncUI();const c=r.command;if(syncFirstPoll){lastSeenSyncTs=Number(c?.ts||0);syncFirstPoll=false;return}if(!portalSyncEnabled||!c)return;const ts=Number(c.ts||0);if(ts<=lastSeenSyncTs)return;lastSeenSyncTs=ts;if(c.sourceId===portalClientId||["toggleSync","syncState"].includes(c.action))return;await applyRemote(c)}catch(e){$("serverStatus").textContent="Serveur inaccessible"}finally{syncPollBusy=false}}
+function updateXPClock(){const el=$("xpClock");if(el)el.textContent=new Date().toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"})}
+updateXPClock();setInterval(updateXPClock,30000);updateModes();updateSyncUI();loadFiles();refreshCookies();pollSync();setInterval(pollSync,1000);setInterval(loadFiles,15000);log("DIVINARVIS V10 prêt.");
 </script>
 
+<script src="{{ url_for('static', filename='divinarvis-ai-launcher.js') }}"></script>
+<script src="{{ url_for('static', filename='divinarvis-radio-final.js') }}"></script>
 </body>
 </html>
