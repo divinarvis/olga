@@ -271,7 +271,8 @@ input:focus{border-color:#e33a98;box-shadow:0 0 0 1px #ffc5e4}
 
       <section class="page" id="page-radio">
         <div class="toolbar"><h1 class="page-title">Radios</h1></div>
-        <div class="grid"><div class="card"><h2>Stations</h2><div class="radio-buttons"><button id="capitalBtn" class="btn primary">▶ Capital</button><button id="loveRadioBtn" class="btn love-radio-btn"><img class="love-radio-icon" src="/static/loveradio.jpg" alt=""><span>Love Radio Russie</span></button><button id="xtraBtn" class="btn primary">▶ Capital XTRA</button></div><div id="radioState" class="notice radio-state">Aucune radio active</div></div><aside class="card"><h2>Flux personnalisé</h2><div class="field"><label for="radioUrl">URL audio directe</label><input id="radioUrl" type="url" placeholder="https://…"><button id="customRadioBtn" class="btn">Lire le flux</button></div><div class="notice">Capital XTRA utilise désormais le flux national MP3 avec solution de repli.</div></aside></div>
+        <div class="grid"><div class="card"><h2>Stations</h2>
+        <div class="radio-buttons"><button id="capitalBtn" class="btn primary">▶️ Capital</button><button id="loveRadioBtn" class="btn love-radio-btn">/static/loveradio.jpg<span>Love Radio Russie</span></button><button id="xtraBtn" class="btn primary">▶️ Capital XTRA</button></div>
       </section>
 
       <section class="page" id="page-sync">
@@ -333,29 +334,12 @@ function updateXPClock(){const el=$("xpClock");if(el)el.textContent=new Date().t
 updateXPClock();setInterval(updateXPClock,30000);
 updateModes();updateSyncUI();loadFiles();refreshCookies();pollSync();setInterval(pollSync,1000);setInterval(loadFiles,15000);log("DIVINARVIS XP Girly Edition prêt.");
 </script>
-
-<div class="love-radio-window" id="loveRadioWindow" hidden>
-  <div class="love-radio-titlebar">
-    <img src="/static/loveradio.jpg" alt="">
-    <span>Love Radio Russie • lecteur officiel</span>
-    <div class="love-radio-actions">
-      <a href="https://player.loveradio.ru/" target="_blank" rel="noopener" title="Ouvrir séparément">↗</a>
-      <button id="closeLoveRadio" type="button" title="Fermer">×</button>
-    </div>
-  </div>
-  <iframe class="love-radio-frame" id="loveRadioFrame" title="Love Radio Russie" loading="lazy" allow="autoplay" referrerpolicy="strict-origin-when-cross-origin"></iframe>
-  <div class="love-radio-fallback" id="loveRadioFallback">Le lecteur intégré est bloqué par le diffuseur.<br><a href="https://player.loveradio.ru/" target="_blank" rel="noopener">Ouvrir le lecteur officiel</a></div>
-</div>
-
+  
 <div class="xp-taskbar" aria-hidden="true">
   <button class="xp-start">🌸 démarrer</button>
   <div class="xp-task-app">🎵 DIVINARVIS MEDIA PLAYER XPERIENCE</div>
   <div class="xp-tray">🔊 🌐 <span id="xpClock">--:--</span></div>
 </div>
-
-}}"></script>
-
-}}"></script>
 
 <script src="{{ url_for('static', filename='divinarvis-ai-launcher.js') }}"></script>
 </body>
