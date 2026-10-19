@@ -14,18 +14,21 @@
     "Grok": "https://grok.com/",
     "Manus / Meta AI": "https://www.meta.ai/",
     "Apple Intelligence": "https://www.apple.com/apple-intelligence/",
-    "Claude": "https://claude.ai/"
+    "Claude": "https://claude.ai/",
+    "Snapchat": "https://www.snapchat.com/",
+    "Revolut": "https://www.revolut.com/"
   };
 
   const APPS = [
     ["ChatGPT", "C", "Frérot", "#159f88"],
     ["Copilot", "∞", "TONTON", "linear-gradient(135deg,#53c9ff,#7857ff,#ef55b8)"],
     ["YT", "▶", "Victime", "#ff0033"],
-    ["Grok", "𝕏", "Empereur", "#111"],
+    ["Grok", "𝕏", "KEKIUS", "#111"],
     ["Manus / Meta AI", "M", "Disquetteur", "#1677e8"],
     ["Apple Intelligence", "AI", "TONTON", "linear-gradient(135deg,#ff9b4a,#e84c9b)"],
-    ["Claude", "A", "Le meilleur poto du Frérot", "#bd643d"]
-  ];
+    ["Claude", "A", "Le meilleur poto du Frérot", "#bd643d"],
+    ["Snapchat", "👻", "Le Messager", "#fffc00"],
+    ["Revolut", "R", "Le Banquier", "#0a0a0a"]  ];
 
   const style = document.createElement("style");
   style.textContent = `
