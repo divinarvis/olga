@@ -21,8 +21,8 @@
 
   const CHOICES = {
     "Manus / Meta AI": [
-      ["🖥️", "MANUS", "Disquetteur", "https://manus.im/"],
-      ["🤖", "META AI", "Le Cousin", "https://www.meta.ai/"]
+      ["🖥️", "MANUS", "Maître Disquetteur", "https://manus.im/"],
+      ["🤖", "META AI", "Darth Disquetteur", "https://www.whatsapp.com/"]
     ]
   };
 
@@ -115,7 +115,7 @@ document.body.appendChild(choice);
 
 const openChoice = name => {
   setMenu(false);
-  choice.innerHTML = `<div class="xp-choice-title"><span>DISQUETTEUR CMD — ${name}</span><button id="xpChoiceClose">✕</button></div><div class="xp-choice-body">${CHOICES[name].map(([icon, label, subtitle], i) => `<button data-i="${i}"><span style="font-size:32px;line-height:1">${icon}</span><strong>${label}</strong><small>${subtitle}</small></button>`).join("")}</div>`;
+  choice.innerHTML = `<div class="xp-choice-title"><span>${name}</span><button id="xpChoiceClose">✕</button></div><div class="xp-choice-body">${CHOICES[name].map(([icon, label, subtitle], i) => `<button data-i="${i}"><span style="font-size:32px;line-height:1">${icon}</span><strong>${label}</strong><small>${subtitle}</small></button>`).join("")}</div>`;
   choice.hidden = false;
   choice.querySelector("#xpChoiceClose").onclick = () => { choice.hidden = true; };
   choice.querySelectorAll("[data-i]").forEach(b => b.onclick = () => { choice.hidden = true; launchAI(name + " / " + CHOICES[name][b.dataset.i][1], CHOICES[name][b.dataset.i][3]); });
