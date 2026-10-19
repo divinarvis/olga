@@ -25,23 +25,17 @@ sync_lock = threading.Lock()
 sync_enabled = False
 last_sync = {"ts": 0, "action": "idle", "sourceId": ""}
 
-# Facultatif mais recommandé sur Render.
-# Ajoute SIRI_TOKEN dans Environment, puis le même token dans l'en-tête
-# X-Divinarvis-Token du raccourci Apple.
-SIRI_TOKEN = os.environ.get("SIRI_TOKEN", "").strip()
-
-CAPITAL_URL = "https://media-ice.musicradio.com/CapitalUKMP3"
-CAPITAL_XTRA_URL = "https://media-ice.musicradio.com/CapitalXTRANationalMP3"
-
 
 def clean_filename(filename: str, fallback_ext: str = "") -> str:
-    """Conserve les accents tout en retirant les caractères dangereux/interdits."""
+    """Conserve les accents tout en retirant les caracteres dangereux."""
     raw = unicodedata.normalize("NFC", str(filename or "").strip())
     raw = raw.replace("\\", "/").split("/")[-1]
     raw = "".join(ch for ch in raw if ch >= " " and ch not in '<>:"/\\|?*')
     raw = re.sub(r"\s+", " ", raw).strip(" .")
+
     if not raw:
         raw = f"fichier_{int(time.time())}{fallback_ext}"
+
     stem, ext = os.path.splitext(raw)
     ext = ext.lower() or fallback_ext
     stem = stem.strip(" .") or f"fichier_{int(time.time())}"
@@ -53,24 +47,29 @@ def unique_destination(filename: str) -> tuple[str, Path]:
     stem, suffix = os.path.splitext(name)
     destination = UPLOAD_DIR / name
     number = 2
+
     while destination.exists():
         name = f"{stem} ({number}){suffix}"
         destination = UPLOAD_DIR / name
         number += 1
+
     return name, destination
 
 
 def safe_existing_path(filename: str) -> Path | None:
-    """Résout strictement un nom déjà stocké sans le déformer."""
+    """Resout strictement un nom deja stocke sans autoriser de sortie du dossier."""
     raw = unicodedata.normalize("NFC", str(filename or "").strip())
     if not raw or raw in {".", ".."} or Path(raw).name != raw:
         return None
+
     candidate = (UPLOAD_DIR / raw).resolve()
     root = UPLOAD_DIR.resolve()
+
     try:
         candidate.relative_to(root)
     except ValueError:
         return None
+
     return candidate
 
 
@@ -86,73 +85,6 @@ def public_file(name: str) -> dict:
     }
 
 
-def normalize_voice_command(value: str) -> str:
-    """Normalise une phrase Siri : minuscules, espaces et accents neutralisés."""
-    text = unicodedata.normalize("NFD", str(value or "").strip().lower())
-    text = "".join(ch for ch in text if unicodedata.category(ch) != "Mn")
-    return re.sub(r"\s+", " ", text).strip()
-
-
-def siri_authorized() -> bool:
-    """Si SIRI_TOKEN existe, exige sa présence dans l'en-tête ou le JSON."""
-    if not SIRI_TOKEN:
-        return True
-    supplied = request.headers.get("X-Divinarvis-Token", "").strip()
-    if not supplied:
-        data = request.get_json(silent=True) or {}
-        supplied = str(data.get("token") or "").strip()
-    return supplied == SIRI_TOKEN
-
-
-def publish_remote_command(payload: dict) -> dict:
-    """Publie une commande que les clients DIVINARVIS récupéreront via /api/sync."""
-    global last_sync
-    command = dict(payload)
-    command["sourceId"] = "siri"
-    command["ts"] = int(time.time() * 1000)
-    with sync_lock:
-        last_sync = command
-    return command
-
-
-SIRI_COMMANDS = {
-    "capital": {
-        "action": "capital",
-        "capitalUrl": CAPITAL_URL,
-        "capitalName": "Capital",
-        "currentRadioId": "capital",
-        "currentTime": 0,
-    },
-    "xtra": {
-        "action": "capital",
-        "capitalUrl": CAPITAL_XTRA_URL,
-        "capitalName": "Capital XTRA",
-        "currentRadioId": "xtra",
-        "currentTime": 0,
-    },
-    "capital xtra": {
-        "action": "capital",
-        "capitalUrl": CAPITAL_XTRA_URL,
-        "capitalName": "Capital XTRA",
-        "currentRadioId": "xtra",
-        "currentTime": 0,
-    },
-    "pause": {"action": "pause"},
-    "stop": {"action": "pause"},
-    "reprendre": {"action": "resume"},
-    "lecture": {"action": "resume"},
-    "play": {"action": "resume"},
-    "suivant": {"action": "next"},
-    "prochain": {"action": "next"},
-    "precedent": {"action": "previous"},
-    "retour": {"action": "previous"},
-    "boucle": {"action": "toggleLoop"},
-    "aleatoire": {"action": "toggleRandom"},
-    "synchronisation": {"action": "enableSync"},
-    "sync": {"action": "enableSync"},
-}
-
-
 @app.route("/")
 def index():
     return render_template("index.html")
@@ -163,8 +95,8 @@ def health():
     return jsonify(
         ok=True,
         service="DIVINARVIS Media Player",
-        siri=True,
-        siriProtected=bool(SIRI_TOKEN),
+        siri=False,
+        navigation="iphone",
         timestamp=int(time.time() * 1000),
     )
 
@@ -172,6 +104,7 @@ def health():
 @app.get("/api/files")
 def list_files():
     files = []
+
     try:
         for path in UPLOAD_DIR.iterdir():
             if path.is_file() and path.suffix.lower() in ALLOWED:
@@ -187,26 +120,34 @@ def list_files():
 def upload_file():
     uploaded = request.files.get("file")
     if not uploaded or not uploaded.filename:
-        return jsonify(ok=False, error="Aucun fichier reçu"), 400
+        return jsonify(ok=False, error="Aucun fichier recu"), 400
 
     original_name = unicodedata.normalize("NFC", uploaded.filename)
     ext = Path(original_name).suffix.lower()
+
     if ext not in ALLOWED:
-        return jsonify(ok=False, error="Format audio ou vidéo non autorisé"), 400
+        return jsonify(ok=False, error="Format audio ou video non autorise"), 400
 
     name, destination = unique_destination(original_name)
-    uploaded.save(destination)
-    return jsonify(ok=True, file=public_file(name))
+
+    try:
+        uploaded.save(destination)
+        return jsonify(ok=True, file=public_file(name))
+    except OSError as exc:
+        return jsonify(ok=False, error=f"Enregistrement impossible : {exc}"), 500
 
 
 @app.post("/api/delete")
 def delete_file():
     data = request.get_json(silent=True) or {}
     path = safe_existing_path(data.get("file", ""))
+
     if path is None:
         return jsonify(ok=False, error="Nom de fichier invalide"), 400
-    if not path.exists():
+    if not path.exists() or not path.is_file():
         return jsonify(ok=False, error="Fichier introuvable"), 404
+    if path.suffix.lower() not in ALLOWED:
+        return jsonify(ok=False, error="Type de fichier non autorise"), 400
 
     try:
         path.unlink()
@@ -217,14 +158,22 @@ def delete_file():
 
 @app.post("/api/delete-all")
 def delete_all_files():
-    deleted, failed = [], []
-    for path in list(UPLOAD_DIR.iterdir()):
+    deleted = []
+    failed = []
+
+    try:
+        paths = list(UPLOAD_DIR.iterdir())
+    except OSError as exc:
+        return jsonify(ok=False, error=str(exc)), 500
+
+    for path in paths:
         if path.is_file() and path.suffix.lower() in ALLOWED:
             try:
                 path.unlink()
                 deleted.append(path.name)
             except OSError as exc:
                 failed.append({"file": path.name, "error": str(exc)})
+
     status = 207 if failed else 200
     return jsonify(ok=not failed, deleted=deleted, failed=failed), status
 
@@ -232,17 +181,24 @@ def delete_all_files():
 @app.get("/api/cookies/status")
 def cookie_status():
     exists = COOKIES_FILE.is_file()
-    return jsonify(exists=exists, size=COOKIES_FILE.stat().st_size if exists else 0)
+    return jsonify(
+        exists=exists,
+        size=COOKIES_FILE.stat().st_size if exists else 0,
+    )
 
 
 @app.post("/api/cookies/upload")
 def cookie_upload():
     uploaded = request.files.get("file")
     if not uploaded or not uploaded.filename:
-        return jsonify(ok=False, error="Aucun fichier reçu"), 400
-    content = uploaded.read(2_000_000).decode("utf-8", errors="ignore")
-    COOKIES_FILE.write_text(content, encoding="utf-8")
-    return jsonify(ok=True, size=len(content))
+        return jsonify(ok=False, error="Aucun fichier recu"), 400
+
+    try:
+        content = uploaded.read(2_000_000).decode("utf-8", errors="ignore")
+        COOKIES_FILE.write_text(content, encoding="utf-8")
+        return jsonify(ok=True, size=len(content))
+    except OSError as exc:
+        return jsonify(ok=False, error=f"Import des cookies impossible : {exc}"), 500
 
 
 @app.post("/api/cookies/delete")
@@ -259,19 +215,37 @@ def cookie_delete():
 def youtube_download():
     data = request.get_json(silent=True) or {}
     url = str(data.get("url") or "").strip()
+
     if not url.startswith(("https://", "http://")):
         return jsonify(ok=False, error="URL invalide"), 400
 
-    before = {p.name for p in UPLOAD_DIR.iterdir() if p.is_file()}
+    try:
+        before = {path.name for path in UPLOAD_DIR.iterdir() if path.is_file()}
+    except OSError as exc:
+        return jsonify(ok=False, error=str(exc)), 500
+
     output = str(UPLOAD_DIR / "%(title).150B.%(ext)s")
     command = [
-        "yt-dlp", "--no-playlist", "--no-overwrites",
-        "--windows-filenames", "--trim-filenames", "150",
-        "-x", "--audio-format", "mp3", "--audio-quality", "0",
-        "--print", "after_move:filepath", "-o", output,
+        "yt-dlp",
+        "--no-playlist",
+        "--no-overwrites",
+        "--windows-filenames",
+        "--trim-filenames",
+        "150",
+        "-x",
+        "--audio-format",
+        "mp3",
+        "--audio-quality",
+        "0",
+        "--print",
+        "after_move:filepath",
+        "-o",
+        output,
     ]
+
     if COOKIES_FILE.is_file():
         command.extend(["--cookies", str(COOKIES_FILE)])
+
     command.append(url)
 
     try:
@@ -283,125 +257,113 @@ def youtube_download():
             errors="replace",
             timeout=240,
         )
+
         if result.returncode != 0:
             return jsonify(
                 ok=False,
-                error=(result.stderr or "Téléchargement échoué")[-1600:],
+                error=(result.stderr or "Telechargement echoue")[-1600:],
             ), 400
 
-        after = {p.name for p in UPLOAD_DIR.iterdir() if p.is_file()}
+        after = {path.name for path in UPLOAD_DIR.iterdir() if path.is_file()}
         created = sorted(after - before)
         printed = [line.strip() for line in result.stdout.splitlines() if line.strip()]
+
         if not created and printed:
             candidate = Path(printed[-1]).name
             if (UPLOAD_DIR / candidate).is_file():
                 created = [candidate]
 
+        files = [
+            public_file(name)
+            for name in created
+            if (UPLOAD_DIR / name).is_file()
+        ]
+
         return jsonify(
             ok=True,
-            title="Téléchargement terminé",
-            files=[public_file(name) for name in created if (UPLOAD_DIR / name).is_file()],
+            title="Telechargement termine",
+            files=files,
         )
+
     except FileNotFoundError:
-        return jsonify(ok=False, error="yt-dlp n'est pas installé sur le serveur."), 501
+        return jsonify(
+            ok=False,
+            error="yt-dlp n'est pas installe sur le serveur.",
+        ), 501
     except subprocess.TimeoutExpired:
-        return jsonify(ok=False, error="Délai de téléchargement dépassé"), 504
+        return jsonify(ok=False, error="Delai de telechargement depasse"), 504
     except Exception as exc:
         app.logger.exception("Erreur YouTube")
         return jsonify(ok=False, error=str(exc)), 500
 
 
-@app.post("/api/siri")
-def siri_command():
-    """Reçoit une commande vocale transmise par Raccourcis/Siri."""
-    global sync_enabled
-
-    if not siri_authorized():
-        return jsonify(ok=False, error="Accès Siri refusé"), 401
-
-    data = request.get_json(silent=True) or {}
-    spoken = str(data.get("command") or data.get("text") or "").strip()
-    normalized = normalize_voice_command(spoken)
-
-    if not normalized:
-        return jsonify(ok=False, error="Commande vide"), 400
-
-    payload = SIRI_COMMANDS.get(normalized)
-    if payload is None:
-        return jsonify(
-            ok=False,
-            error="Commande inconnue",
-            heard=spoken,
-            supported=[
-                "capital",
-                "capital xtra",
-                "pause",
-                "reprendre",
-                "suivant",
-                "précédent",
-                "boucle",
-                "aléatoire",
-                "synchronisation",
-            ],
-        ), 400
-
-    if payload["action"] == "enableSync":
-        with sync_lock:
-            sync_enabled = True
-        published = publish_remote_command({"action": "syncState", "enabled": True})
-        return jsonify(
-            ok=True,
-            heard=spoken,
-            message="Synchronisation DIVINARVIS activée",
-            command=published,
-        )
-
-    # Siri sert de télécommande : on active la réception des commandes.
-    with sync_lock:
-        sync_enabled = True
-
-    published = publish_remote_command(payload)
-    return jsonify(
-        ok=True,
-        heard=spoken,
-        normalized=normalized,
-        message=f"Commande DIVINARVIS reçue : {spoken}",
-        command=published,
-    )
-
-
 @app.route("/api/sync", methods=["GET", "POST"])
 def sync():
+    """Synchronisation entre les interfaces DIVINARVIS, sans Siri."""
     global sync_enabled, last_sync
+
     if request.method == "GET":
         with sync_lock:
-            return jsonify({"enabled": sync_enabled, "command": dict(last_sync)})
+            return jsonify(
+                enabled=sync_enabled,
+                command=dict(last_sync),
+            )
 
     data = request.get_json(silent=True) or {}
-    action = data.get("action", "")
+    action = str(data.get("action") or "").strip()
+
+    if not action:
+        return jsonify(ok=False, error="Action de synchronisation manquante"), 400
+
     with sync_lock:
         if action == "toggleSync":
             sync_enabled = bool(data.get("enabled", False))
             last_sync = {
                 "action": "syncState",
                 "enabled": sync_enabled,
-                "sourceId": str(data.get("sourceId", "")),
+                "sourceId": str(data.get("sourceId") or "iphone"),
                 "ts": int(time.time() * 1000),
             }
-            return jsonify(ok=True, enabled=sync_enabled, command=last_sync)
+            return jsonify(
+                ok=True,
+                enabled=sync_enabled,
+                command=dict(last_sync),
+            )
 
         if not sync_enabled:
             return jsonify(ok=True, ignored=True, enabled=False)
 
         last_sync = dict(data)
+        last_sync["sourceId"] = str(last_sync.get("sourceId") or "iphone")
         last_sync["ts"] = int(time.time() * 1000)
-        return jsonify(ok=True, enabled=True, command=last_sync)
+
+        return jsonify(
+            ok=True,
+            enabled=True,
+            command=dict(last_sync),
+        )
 
 
 @app.errorhandler(413)
 def too_large(_error):
-    return jsonify(ok=False, error="Fichier trop volumineux (maximum 512 Mo)"), 413
+    return jsonify(
+        ok=False,
+        error="Fichier trop volumineux (maximum 512 Mo)",
+    ), 413
+
+
+@app.errorhandler(404)
+def not_found(_error):
+    return jsonify(ok=False, error="Ressource introuvable"), 404
+
+
+@app.errorhandler(500)
+def internal_error(_error):
+    return jsonify(ok=False, error="Erreur interne du serveur"), 500
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", "10000")))
+    app.run(
+        host="0.0.0.0",
+        port=int(os.environ.get("PORT", "10000")),
+    )
