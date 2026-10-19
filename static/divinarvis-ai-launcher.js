@@ -19,6 +19,11 @@
     "Revolut": "https://www.revolut.com/"
   };
 
+  const CHOICES = {
+  "Manus": [["🌐 Site Manus", "https://manus.im/"], ["🚀 App Manus", "https://manus.im/app"]],
+  "Meta AI": [["🌐 Meta AI", "https://www.meta.ai/"], ["💬 WhatsApp Web", "https://web.whatsapp.com/"]]
+  };
+
   const APPS = [
     ["ChatGPT", "C", "Frérot", "#159f88"],
     ["Copilot", "∞", "TONTON", "linear-gradient(135deg,#53c9ff,#7857ff,#ef55b8)"],
@@ -28,7 +33,7 @@
     ["Apple Intelligence", "AI", "TONTON", "linear-gradient(135deg,#ff9b4a,#e84c9b)"],
     ["Claude", "A", "Le meilleur poto du Frérot", "#bd643d"],
     ["Snapchat", "👻", "Le Messager", "#fffc00"],
-    ["Revolut", "R", "Le Banquier", "#0a0a0a"]  ];
+    ["Revolut", "R", "Le Banquier", "linear-gradient(135deg,#ff2d2d,#ff9a00,#ffe600,#2ecc40,#00b3ff,#7a4dff,#e040c8)"]  ];
 
   const style = document.createElement("style");
   style.textContent = `
@@ -47,6 +52,13 @@
     .start-side{padding:9px 8px;background:linear-gradient(#f0def9,#dbe8ff);border-left:1px solid #d1add2}.start-side button{width:100%;border:0;background:transparent;color:#52223f;text-align:left;padding:8px 6px;border-radius:4px;font-size:11px;cursor:pointer}.start-side button:hover{background:rgba(255,255,255,.75)}
     .start-footer{display:flex;justify-content:flex-end;padding:8px 10px;background:linear-gradient(#e999c8,#c53d8a)}.start-footer button{border:1px solid rgba(255,255,255,.75);border-radius:4px;padding:5px 9px;color:#fff;background:rgba(111,22,79,.35);cursor:pointer}
     .start-toast{position:fixed;left:50%;bottom:50px;z-index:1200;transform:translateX(-50%);padding:9px 14px;border:2px solid #a62075;border-radius:7px;background:#fff6fc;color:#641747;box-shadow:0 5px 18px rgba(82,10,58,.3);font-weight:700;opacity:0;pointer-events:none;transition:.2s}.start-toast.show{opacity:1;bottom:57px}
+    .xp-choice{position:fixed;left:50%;top:50%;z-index:1300;width:min(320px,calc(100vw - 24px));transform:translate(-50%,-50%);border:2px solid #a62075;border-radius:8px 8px 0 0;overflow:hidden;background:#fff;box-shadow:5px 8px 26px rgba(78,11,55,.45)}
+    .xp-choice[hidden]{display:none}
+    .xp-choice-title{display:flex;justify-content:space-between;align-items:center;padding:6px 8px;color:#fff;font-weight:700;font-size:13px;background:linear-gradient(#ff88c7,#d33892 48%,#a71e70);text-shadow:1px 1px #72124c}
+    .xp-choice-title button{width:22px;height:22px;border:1px solid #fff;border-radius:4px;background:#d9534f;color:#fff;cursor:pointer}
+    .xp-choice-body{display:grid;gap:8px;padding:12px}
+    .xp-choice-body button{padding:10px;border:1px solid #dd8dbf;border-radius:5px;background:linear-gradient(#fff,#ffe1f1);color:#35152c;font-weight:700;text-align:left;cursor:pointer}
+    .xp-choice-body button:hover{background:linear-gradient(90deg,#ffe1f1,#eedfff)}
     @media(max-width:560px){.xp-start-menu{left:3px;width:calc(100vw - 6px)}.start-body{grid-template-columns:minmax(0,1fr) 95px}.ai-launch{padding:6px}.start-side{padding:7px 5px}}
   `;
   document.head.appendChild(style);
@@ -85,18 +97,30 @@
   document.body.appendChild(toast);
   const notify = message => { toast.textContent = message; toast.classList.add("show"); clearTimeout(notify.timer); notify.timer = setTimeout(() => toast.classList.remove("show"), 2200); };
   const setMenu = open => { menu.hidden = !open; startButton.setAttribute("aria-expanded", String(open)); };
-  const launchAI = name => {
-    setMenu(false);
-    const popupName = `divinarvis_${name.replace(/[^a-z0-9]+/gi, "_")}`;
-    const popup = window.open(WEB_APPS[name], popupName, POPUP_FEATURES);
-    if (!popup) notify("Pop-up bloquée : autorise les fenêtres pour DIVINARVIS.");
-    else { try { popup.focus(); } catch (_) {} }
-  };
+  const launchAI = (name, url = WEB_APPS[name]) => {
+  setMenu(false);
+  const popupName = `divinarvis_${name.replace(/[^a-z0-9]+/gi, "_")}`;
+  const popup = window.open(url, popupName, POPUP_FEATURES);
+  if (!popup) notify("Pop-up bloquée : autorise les fenêtres pour DIVINARVIS.");
+  else { try { popup.focus(); } catch (_) {} }
+};
+
+const choice = document.createElement("div");
+choice.className = "xp-choice";
+choice.hidden = true;
+document.body.appendChild(choice);
+
+const openChoice = name => {
+  setMenu(false);
+  choice.innerHTML = `<div class="xp-choice-title"><span>${name} : choisis ton chemin</span><button id="xpChoiceClose">✕</button></div><div class="xp-choice-body">${CHOICES[name].map(([label], i) => `<button data-i="${i}">${label}</button>`).join("")}</div>`;
+  choice.hidden = false;
+  choice.querySelector("#xpChoiceClose").onclick = () => { choice.hidden = true; };
+  choice.querySelectorAll("[data-i]").forEach(b => b.onclick = () => { choice.hidden = true; launchAI(name, CHOICES[name][b.dataset.i][1]); });
+};
 
   startButton.addEventListener("click", event => { event.stopPropagation(); setMenu(menu.hidden); });
   menu.querySelector("#closeStartMenu").addEventListener("click", () => setMenu(false));
-  menu.querySelectorAll(".ai-launch").forEach(button => button.addEventListener("click", () => launchAI(button.dataset.ai)));
-  menu.querySelectorAll("[data-local]").forEach(button => button.addEventListener("click", () => { setMenu(false); if (typeof window.showPage === "function") window.showPage(button.dataset.local); }));
+menu.querySelectorAll(".ai-launch").forEach(button => button.addEventListener("click", () => CHOICES[button.dataset.ai] ? openChoice(button.dataset.ai) : launchAI(button.dataset.ai)));  menu.querySelectorAll("[data-local]").forEach(button => button.addEventListener("click", () => { setMenu(false); if (typeof window.showPage === "function") window.showPage(button.dataset.local); }));
   document.addEventListener("click", event => { if (!menu.hidden && !menu.contains(event.target) && event.target !== startButton) setMenu(false); });
   document.addEventListener("keydown", event => { if (event.key === "Escape") setMenu(false); });
 })();
