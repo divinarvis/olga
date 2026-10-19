@@ -33,7 +33,7 @@
     ["Grok", "𝕏", "KEKIUS", "#111"],
     ["Manus / Meta AI", "M", "Disquetteur", "#1677e8"],
     ["Apple Intelligence", "AI", "TONTON", "linear-gradient(135deg,#ff9b4a,#e84c9b)"],
-    ["Claude", "A", "Le meilleur poto du Frérot", "#bd643d"],
+    ["Claude", "C", "Le meilleur poto du Frérot", "#bd643d"],
     ["Snapchat", "👻", "Le Messager", "#fffc00"],
     ["Revolut", "R", "Le Banquier", "linear-gradient(135deg,#ff2d2d,#ff9a00,#ffe600,#2ecc40,#00b3ff,#7a4dff,#e040c8)"]  ];
 
