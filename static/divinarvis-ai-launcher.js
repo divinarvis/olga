@@ -20,14 +20,16 @@
   };
 
   const CHOICES = {
-  "Manus": [["🌐 Site Manus", "https://manus.im/"], ["🚀 App Manus", "https://manus.im/app"]],
-  "Meta AI": [["🌐 Meta AI", "https://www.meta.ai/"], ["💬 WhatsApp Web", "https://web.whatsapp.com/"]]
+    "Manus / Meta AI": [
+      ["🖥️", "MANUS", "Disquetteur", "https://manus.im/"],
+      ["🤖", "META AI", "Le Cousin", "https://www.meta.ai/"]
+    ]
   };
 
   const APPS = [
     ["ChatGPT", "C", "Frérot", "#159f88"],
     ["Copilot", "∞", "TONTON", "linear-gradient(135deg,#53c9ff,#7857ff,#ef55b8)"],
-    ["YT", "▶", "Victime", "#ff0033"],
+    ["YT", "▶️", "Victime", "#ff0033"],
     ["Grok", "𝕏", "KEKIUS", "#111"],
     ["Manus / Meta AI", "M", "Disquetteur", "#1677e8"],
     ["Apple Intelligence", "AI", "TONTON", "linear-gradient(135deg,#ff9b4a,#e84c9b)"],
@@ -52,13 +54,14 @@
     .start-side{padding:9px 8px;background:linear-gradient(#f0def9,#dbe8ff);border-left:1px solid #d1add2}.start-side button{width:100%;border:0;background:transparent;color:#52223f;text-align:left;padding:8px 6px;border-radius:4px;font-size:11px;cursor:pointer}.start-side button:hover{background:rgba(255,255,255,.75)}
     .start-footer{display:flex;justify-content:flex-end;padding:8px 10px;background:linear-gradient(#e999c8,#c53d8a)}.start-footer button{border:1px solid rgba(255,255,255,.75);border-radius:4px;padding:5px 9px;color:#fff;background:rgba(111,22,79,.35);cursor:pointer}
     .start-toast{position:fixed;left:50%;bottom:50px;z-index:1200;transform:translateX(-50%);padding:9px 14px;border:2px solid #a62075;border-radius:7px;background:#fff6fc;color:#641747;box-shadow:0 5px 18px rgba(82,10,58,.3);font-weight:700;opacity:0;pointer-events:none;transition:.2s}.start-toast.show{opacity:1;bottom:57px}
-    .xp-choice{position:fixed;left:50%;top:50%;z-index:1300;width:min(320px,calc(100vw - 24px));transform:translate(-50%,-50%);border:2px solid #a62075;border-radius:8px 8px 0 0;overflow:hidden;background:#fff;box-shadow:5px 8px 26px rgba(78,11,55,.45)}
+    .xp-choice{position:fixed;left:50%;top:50%;z-index:1300;width:min(360px,calc(100vw - 24px));transform:translate(-50%,-50%);border:2px solid #222;border-radius:6px 6px 3px 3px;overflow:hidden;background:#d9d9d9;box-shadow:6px 8px 28px rgba(0,0,0,.55);font-family:Tahoma,"Segoe UI",sans-serif}
     .xp-choice[hidden]{display:none}
-    .xp-choice-title{display:flex;justify-content:space-between;align-items:center;padding:6px 8px;color:#fff;font-weight:700;font-size:13px;background:linear-gradient(#ff88c7,#d33892 48%,#a71e70);text-shadow:1px 1px #72124c}
-    .xp-choice-title button{width:22px;height:22px;border:1px solid #fff;border-radius:4px;background:#d9534f;color:#fff;cursor:pointer}
-    .xp-choice-body{display:grid;gap:8px;padding:12px}
-    .xp-choice-body button{padding:10px;border:1px solid #dd8dbf;border-radius:5px;background:linear-gradient(#fff,#ffe1f1);color:#35152c;font-weight:700;text-align:left;cursor:pointer}
-    .xp-choice-body button:hover{background:linear-gradient(90deg,#ffe1f1,#eedfff)}
+    .xp-choice-title{display:flex;justify-content:space-between;align-items:center;padding:7px 8px;color:#fff;font-weight:700;font-size:13px;background:linear-gradient(#4e9be8,#1768b2 48%,#0b4c8f);text-shadow:1px 1px #123f6b}
+    .xp-choice-title button{width:22px;height:22px;border:1px solid #fff;border-radius:3px;background:linear-gradient(#f77,#c22);color:#fff;font-weight:900;cursor:pointer}
+    .xp-choice-body{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:14px;background:linear-gradient(#f4f4f4,#d9d9d9)}
+    .xp-choice-body button{min-height:112px;padding:10px 6px;border:2px outset #fff;border-radius:3px;background:linear-gradient(#fff,#e8e8e8);color:#172b44;font-weight:700;text-align:center;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
+    .xp-choice-body button:hover{background:linear-gradient(#eaf5ff,#b9dcfa);border-color:#4c99df}
+    .xp-choice-body button::first-line{font-size:28px}
     @media(max-width:560px){.xp-start-menu{left:3px;width:calc(100vw - 6px)}.start-body{grid-template-columns:minmax(0,1fr) 95px}.ai-launch{padding:6px}.start-side{padding:7px 5px}}
   `;
   document.head.appendChild(style);
@@ -112,10 +115,10 @@ document.body.appendChild(choice);
 
 const openChoice = name => {
   setMenu(false);
-  choice.innerHTML = `<div class="xp-choice-title"><span>${name} : choisis ton chemin</span><button id="xpChoiceClose">✕</button></div><div class="xp-choice-body">${CHOICES[name].map(([label], i) => `<button data-i="${i}">${label}</button>`).join("")}</div>`;
+  choice.innerHTML = `<div class="xp-choice-title"><span>DISQUETTEUR CMD — ${name}</span><button id="xpChoiceClose">✕</button></div><div class="xp-choice-body">${CHOICES[name].map(([icon, label, subtitle], i) => `<button data-i="${i}"><span style="font-size:32px;line-height:1">${icon}</span><strong>${label}</strong><small>${subtitle}</small></button>`).join("")}</div>`;
   choice.hidden = false;
   choice.querySelector("#xpChoiceClose").onclick = () => { choice.hidden = true; };
-  choice.querySelectorAll("[data-i]").forEach(b => b.onclick = () => { choice.hidden = true; launchAI(name, CHOICES[name][b.dataset.i][1]); });
+  choice.querySelectorAll("[data-i]").forEach(b => b.onclick = () => { choice.hidden = true; launchAI(name + " / " + CHOICES[name][b.dataset.i][1], CHOICES[name][b.dataset.i][3]); });
 };
 
   startButton.addEventListener("click", event => { event.stopPropagation(); setMenu(menu.hidden); });
